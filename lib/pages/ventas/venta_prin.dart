@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../drawer.dart';
 import '../botones_navegacion.dart';
+import '../clientes.dart';
+import '../ventas/ventas2.dart';
 
 class LibroData {
   final String title;
@@ -15,7 +17,7 @@ List<LibroData> libros = [
   LibroData(title: '72227723', subtitle: 'Miguel Zarate Perez'),
 ];
 
-class Clientes extends StatelessWidget {
+class VentaPrin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,211 +59,105 @@ class Clientes extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Clientes',
+                    'Ventas',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.refresh),
-                    onPressed: () {
-                      // Agrega la lógica de refresco aquí
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(16.0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(
-                      color: const Color.fromARGB(255, 40, 42, 43),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(
-                      color: const Color.fromARGB(255, 40, 42, 43),
-                    ),
-                  ),
-                  labelText: 'Nombre del Cliente',
-                  hintText: 'Ingrese el nombre del Cliente',
-                ),
-              ),
-              SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () {
-                  // Agrega la lógica para el botón aquí
-                },
-                style: ElevatedButton.styleFrom(
-                  primary:
-                      Color.fromARGB(255, 250, 205, 5), // Color de fondo negro
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Container(
-                  width: double.infinity, // Ancho máximo
-                  padding: EdgeInsets.symmetric(
-                      vertical:
-                          8.0), // Ajusta el valor vertical para cambiar la altura del botón
-                  child: Center(
-                    child: Text(
-                      "Buscar",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.refresh),
+                        onPressed: () {
+                          // Agrega la lógica de refresco aquí
+                        },
                       ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 9),
-              ElevatedButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SingleChildScrollView(
+                      SizedBox(
+                        width: 11, // Espacio entre los botones
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Clientes(), 
+                          ));
+                        },
                         child: Container(
-                          padding: EdgeInsets.all(16.0),
-                          child: Column(
+                          padding: EdgeInsets.all(
+                              7), // Ajusta el relleno según tus necesidades
+                          decoration: BoxDecoration(
+                            color: Colors.grey, // Color del botón
+                            borderRadius: BorderRadius.circular(
+                                8), // Ajusta según tu preferencia
+                          ),
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              SizedBox(height: 10),
+                            children: [
+                              Icon(Icons.add,
+                                  color: Colors.white), // Icono "más"
                               Text(
-                                "Agregar Cliente",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 31, 30, 30),
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(16.0),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  labelText: 'Nombre Completo',
-                                  hintText: 'Ingrese los nombres',
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(16.0),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  labelText: 'Apellido Completo',
-                                  hintText: 'Ingrese los apellidos',
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(16.0),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  labelText: 'DNI',
-                                  hintText: 'Ingrese el N° DNI',
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(16.0),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: BorderSide(
-                                      color:
-                                          const Color.fromARGB(255, 50, 53, 56),
-                                    ),
-                                  ),
-                                  labelText: 'Telefono',
-                                  hintText: 'Ingrese el n° telefonico',
-                                ),
-                              ),
-                              SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Agrega la lógica para el botón aquí
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  primary: Color.fromARGB(255, 53, 75, 245),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Center(
-                                    child: Text(
-                                      "Agregar",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                'Cliente',
+                                style: TextStyle(color: Colors.white),
                               ),
                             ],
                           ),
                         ),
-                      );
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(16.0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: const Color.fromARGB(255, 40, 42, 43),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                          borderSide: BorderSide(
+                            color: const Color.fromARGB(255, 40, 42, 43),
+                          ),
+                        ),
+                        labelText: 'Nombre del Cliente',
+                        hintText: 'Ingrese el nombre del Cliente',
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                      width: 8), // Espacio entre el TextFormField y los iconos
+                  IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      // Agrega la lógica de refresco aquí
                     },
-                  );
+                  ),
+                  SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.calendar_today),
+                    onPressed: () {
+                      // Agrega la lógica de refresco aquífolutter
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Venta2(),
+                ));
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 53, 75, 245),
+                  primary:
+                      Color.fromARGB(255, 53, 75, 245), // Color de fondo negro
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -273,7 +169,7 @@ class Clientes extends StatelessWidget {
                           8.0), // Ajusta el valor vertical para cambiar la altura del botón
                   child: Center(
                     child: Text(
-                      "Agregar",
+                      "Vender",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
@@ -443,7 +339,8 @@ class Clientes extends StatelessWidget {
                                               // Agrega la lógica para el botón aquí
                                             },
                                             style: ElevatedButton.styleFrom(
-                                              primary: Color.fromARGB(255, 18, 94,25),
+                                              primary: Color.fromARGB(
+                                                  255, 18, 94, 25),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(8),

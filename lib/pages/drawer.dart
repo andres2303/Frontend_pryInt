@@ -3,6 +3,7 @@ import 'clientes.dart';
 import 'login.dart';
 import 'libros.dart';
 import 'proveedor.dart'; 
+import 'ventas/venta_prin.dart'; 
 
 class Draw extends StatelessWidget {
   @override
@@ -21,7 +22,7 @@ class Draw extends StatelessWidget {
                 ],
               ),
             ),
-            height: 150,
+            height: 200,
             alignment: Alignment.center,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -77,6 +78,10 @@ class Draw extends StatelessWidget {
                         } else if (option.title == 'Clientes') {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => Clientes(), 
+                          ));
+                        }else if (option.title == 'Ventas') {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => VentaPrin(), 
                           ));
                         }
                       },
