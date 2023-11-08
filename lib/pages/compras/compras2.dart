@@ -17,7 +17,7 @@ List<LibroData> libros = [
   LibroData(title: '72227723', subtitle: 'Miguel Zarate Perez'),
 ];
 
-class Venta2 extends StatelessWidget {
+class Compra2 extends StatelessWidget {
   final TextEditingController codigoController = TextEditingController();
   final TextEditingController libroController = TextEditingController();
   final TextEditingController stockController = TextEditingController();
@@ -32,7 +32,7 @@ class Venta2 extends StatelessWidget {
         title: Row(
           children: [
             Text(
-              'Ventas',
+              'Compras',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -91,8 +91,8 @@ class Venta2 extends StatelessWidget {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'DNI del Cliente',
-                        hintText: 'Ingrese el N° DNI del Cliente',
+                        labelText: 'Proveedor',
+                        hintText: 'Ingrese el Proveedor',
                       ),
                     ),
                   ),
@@ -205,29 +205,6 @@ class Venta2 extends StatelessWidget {
                   SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
-                      controller: stockController,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(16.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: const Color.fromARGB(255, 40, 42, 43),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: const Color.fromARGB(255, 40, 42, 43),
-                          ),
-                        ),
-                        labelText: 'Stock',
-                        hintText: 'esta predeterminado',
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: TextFormField(
                       controller: cantidadController,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(16.0),
@@ -273,7 +250,7 @@ class Venta2 extends StatelessWidget {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'PrecioVenta',
+                        labelText: 'PrecioCompra',
                         hintText: 'es predeterminado',
                       ),
                     ),
@@ -573,7 +550,6 @@ class Venta2 extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 14),
                             ],
                           );
                         },

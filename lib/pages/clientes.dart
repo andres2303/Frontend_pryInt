@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'drawer.dart';
-import 'botones_navegacion.dart';
+import 'components/drawer.dart';
+import 'components/botones_navegacion.dart';
 
 class LibroData {
   final String title;
@@ -464,6 +464,7 @@ class Clientes extends StatelessWidget {
                                               ),
                                             ),
                                           ),
+                                          SizedBox(height: 16),
                                         ],
                                       ),
                                     ),

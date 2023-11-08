@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
 import '../clientes.dart';
-import '../ventas/ventas2.dart';
+import '../compras/compras2.dart';
 
 class LibroData {
   final String title;
@@ -17,7 +17,7 @@ List<LibroData> libros = [
   LibroData(title: '72227723', subtitle: 'Miguel Zarate Perez'),
 ];
 
-class VentaPrin extends StatelessWidget {
+class CompraPrin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +59,7 @@ class VentaPrin extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Ventas',
+                    'Compras',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -126,8 +126,8 @@ class VentaPrin extends StatelessWidget {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'Nombre del Cliente',
-                        hintText: 'Ingrese el nombre del Cliente',
+                        labelText: 'Numero de Compra',
+                        hintText: 'Ingrese el numero de compra',
                       ),
                     ),
                   ),
@@ -152,7 +152,7 @@ class VentaPrin extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => Venta2(),
+                            builder: (context) => Compra2(),
                 ));
                 },
                 style: ElevatedButton.styleFrom(
@@ -169,7 +169,7 @@ class VentaPrin extends StatelessWidget {
                           8.0), // Ajusta el valor vertical para cambiar la altura del botón
                   child: Center(
                     child: Text(
-                      "Vender",
+                      "Comprar",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,

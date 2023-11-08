@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'drawer.dart';
-import 'botones_navegacion.dart';
+import 'components/drawer.dart';
+import 'components/botones_navegacion.dart';
+import 'package:lottie/lottie.dart'; // Importa la librería Lottie
 
 class Inicio extends StatelessWidget {
   @override
@@ -39,7 +40,11 @@ class Inicio extends StatelessWidget {
         slivers: <Widget>[
           SliverFillRemaining(
             child: Center(
-              child: Text('Esta es la pantalla de inicio.'),
+              child: Lottie.asset(
+                'assets/ini_anima.json', // Ruta a tu archivo JSON Lottie
+                width: 200, // Ajusta el tamaño según tus necesidades
+                height: 200,
+              ),
             ),
           ),
         ],

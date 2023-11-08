@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'clientes.dart';
-import 'login.dart';
-import 'libros.dart';
-import 'proveedor.dart'; 
-import 'ventas/venta_prin.dart'; 
+import '../clientes.dart';
+import '../login.dart';
+import '../libros.dart';
+import '../proveedor.dart'; 
+import '../ventas/venta_prin.dart'; 
+import '../compras/compras_prin.dart'; 
 
 class Draw extends StatelessWidget {
   @override
@@ -82,6 +83,10 @@ class Draw extends StatelessWidget {
                         }else if (option.title == 'Ventas') {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => VentaPrin(), 
+                          ));
+                        }else if (option.title == 'Compras') {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => CompraPrin(), 
                           ));
                         }
                       },
