@@ -5,6 +5,7 @@ import '../libros.dart';
 import '../proveedor.dart'; 
 import '../ventas/venta_prin.dart'; 
 import '../compras/compras_prin.dart'; 
+import '../trabajadores/trabajadores.dart';
 
 class Draw extends StatelessWidget {
   @override
@@ -87,6 +88,10 @@ class Draw extends StatelessWidget {
                         }else if (option.title == 'Compras') {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => CompraPrin(), 
+                          ));
+                        }else if (option.title == 'Trabajadores') {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Trabajadores(), 
                           ));
                         }
                       },
