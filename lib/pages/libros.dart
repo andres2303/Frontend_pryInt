@@ -1,6 +1,65 @@
 import 'package:flutter/material.dart';
-import 'components/drawer.dart';
-import 'components/botones_navegacion.dart';
+
+import '../pages/components/botones_navegacion.dart';
+import '../pages/components/drawer.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../pages/clientes/detalle_cliente.dart';
+
+class LibroModelo {
+  final int id;
+  final String titulo;
+  final int stock;
+
+  LibroModelo({required this.id, required this.titulo, required this.stock});
+
+  factory LibroModelo.fromJson(Map<String, dynamic> json) {
+    int id = json['id'] ?? 0;
+    String titulo = json['titulo'] ?? '';
+    int stock = json['stock'] ?? 0;
+
+    return LibroModelo(
+      id: id,
+      titulo: titulo,
+      stock: stock,
+    );
+  }
+}
+
+// Desde el api service
+
+List<LibroModelo> libroModeloFromJson(String str) {
+  final jsonData = json.decode(str);
+  return List<LibroModelo>.from(jsonData.map((x) => LibroModelo.fromJson(x)));
+}
+
+Future<List<LibroModelo>> fetchLibrosModelo() async {
+  final response =
+      await http.get(Uri.parse('http://localhost:8080/api/libros/listar'));
+
+  if (response.statusCode == 200) {
+    // Parsear JSON
+    return libroModeloFromJson(response.body);
+  } else {
+    // Manejar error
+    throw Exception('Failed to load libros');
+  }
+}
+
+class LibroService {
+  Future<void> deleteLibro(int id) async {
+    final response = await http
+        .delete(Uri.parse('http://localhost:8080/api/libros/eliminar/$id'));
+
+    if (response.statusCode == 204) {
+      // El libro se eliminó correctamente
+      print('Libro eliminado');
+    } else {
+      // Ocurrió un error al eliminar el libro
+      print('Error al eliminar el libro');
+    }
+  }
+}
 
 class Libro extends StatefulWidget {
   @override
@@ -8,10 +67,11 @@ class Libro extends StatefulWidget {
 }
 
 class LibroData {
+  final int id;
   final String title;
   final String subtitle;
 
-  LibroData({required this.title, required this.subtitle});
+  LibroData({required this.id, required this.title, required this.subtitle});
 }
 
 class _LibroState extends State<Libro> {
@@ -19,12 +79,37 @@ class _LibroState extends State<Libro> {
   String? seleccionarCate;
   String? seleccionarEdito;
 
-  List<LibroData> libros = [
-    LibroData(title: 'Stock: 10', subtitle: 'El origen de las especias'),
-    LibroData(title: 'Stock: 10', subtitle: 'El origen de las especias'),
-    LibroData(title: 'Stock: 10', subtitle: 'El origen de las especias'),
-    LibroData(title: 'Stock: 10', subtitle: 'El origen de las especias'),
-  ];
+  List<LibroData> libros = [];
+  final LibroService libroService = LibroService();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchLibrosModelo().then((fetchedLibros) {
+      setState(() {
+        libros = fetchedLibros.map((libroModelo) {
+          return LibroData(
+            id: libroModelo.id,
+            title: libroModelo.titulo,
+            subtitle: 'Stock:  ${libroModelo.stock}',
+          );
+        }).toList();
+      });
+    });
+  }
+
+  Future<void> actualizarLibros() async {
+    final fetchedLibros = await fetchLibrosModelo();
+    setState(() {
+      libros = fetchedLibros.map((libroModelo) {
+        return LibroData(
+          id: libroModelo.id,
+          title: libroModelo.titulo,
+          subtitle: 'Stock: ${libroModelo.stock}',
+        );
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +161,7 @@ class _LibroState extends State<Libro> {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
-                      // Agrega la lógica de refresco aquí
+                          actualizarLibros();
                     },
                   ),
                 ],
@@ -414,6 +499,18 @@ class _LibroState extends State<Libro> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
+                            icon: Icon(Icons.visibility,
+                                color: Colors.black), // Icono de editar negro
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return DetalleCliente(); // Llama al widget del modal
+                                },
+                              );
+                            },
+                          ),
+                          IconButton(
                             icon: Icon(Icons.edit, color: Colors.blue),
                             onPressed: () {
                               showModalBottomSheet(
@@ -657,6 +754,7 @@ class _LibroState extends State<Libro> {
                                 color: Colors.red), // Icono de eliminar rojo
                             onPressed: () {
                               // Lógica para borrar aquí
+                              LibroService().deleteLibro(libro.id);
                             },
                           ),
                         ],

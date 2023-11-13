@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../clientes.dart';
+import '../clientes/clientes.dart';
 import '../login.dart';
 import '../libros.dart';
-import '../proveedor.dart'; 
+import '../proveedores/proveedor.dart'; 
 import '../ventas/venta_prin.dart'; 
 import '../compras/compras_prin.dart'; 
 import '../trabajadores/trabajadores.dart';

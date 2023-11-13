@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../libros.dart'; // Ajusta la ruta a tu archivo 'libros.dart'
-import '../clientes.dart'; // Ajusta la ruta a tu archivo 'clientes.dart'
-import '../proveedor.dart'; // Ajusta la ruta a tu archivo 'proveedor.dart'
+import '../clientes/clientes.dart'; // Ajusta la ruta a tu archivo 'clientes.dart'
+import '../proveedores/proveedor.dart'; // Ajusta la ruta a tu archivo 'proveedor.dart'
 
 class BotonesNavegacion extends StatefulWidget {
   @override

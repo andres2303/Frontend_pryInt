@@ -3,8 +3,6 @@ import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
 import '../trabajadores/agre_traba.dart';
 import '../trabajadores/edi_traba.dart';
-import 'package:http/http.dart'as http;
-import 'dart:convert';
 
 class Trabajadoress {
   final String title;
@@ -13,67 +11,19 @@ class Trabajadoress {
   Trabajadoress({required this.title, required this.subtitle});
 }
 
+class Inventario extends StatefulWidget {
+  @override
+  _InventarioState createState() => _InventarioState();
+}
+
 List<Trabajadoress> libros = [
-  Trabajadoress(title: 'Xxxx', subtitle: 'Xxxxx'),
+  Trabajadoress(title: 'Administrador', subtitle: 'Andres Diaz Mendoza'),
+  Trabajadoress(title: 'Cajero', subtitle: 'Stheven Caruajulca'),
+  Trabajadoress(title: 'Cajero', subtitle: 'Leonardo Matos'),
 ];
 
-class Persona {
-  final String nombre;
-  final String dni;
-  final String apellidos;
-  final String codigo;
 
-  Persona({
-    required this.nombre,
-    required this.apellidos,
-    required this.dni,
-    required this.codigo,
-  });
-}
-
-class TrabajadorModelo {
-  final int idTrabajador;
-  final String nombrePersona;
-  final String apellidosPersona;
-  final String codigoTrabajador;
-
-  TrabajadorModelo(
-      {required this.idTrabajador,
-      required this.nombrePersona,
-      required this.apellidosPersona,
-      required this.codigoTrabajador});
-
-  factory TrabajadorModelo.fromJson(Map<String, dynamic> json) {
-    print(json);
-    return TrabajadorModelo(
-      idTrabajador: json['idTrabajador'] as int,
-      nombrePersona: json['persona']['nombre'] as String,
-      apellidosPersona: json['persona']['apellidos'] as String,
-      codigoTrabajador: json['persona']['codigo'] as String,
-    );
-  }
-}
-
-List<TrabajadorModelo> clienteModeloFromJson(String str) {
-  final jsonData = json.decode(str);
-  return List<TrabajadorModelo>.from(
-      jsonData.map((x) => TrabajadorModelo.fromJson(x)));
-}
-
-Future<List<TrabajadorModelo>> fetchClientesModelo() async {
-  final response =
-      await http.get(Uri.parse('http://localhost:8080/api/trabajadores/listar'));
-
-  if (response.statusCode == 200) {
-    // Parsear JSON
-    return clienteModeloFromJson(response.body);
-  } else {
-    // Manejar error
-    throw Exception('Failed to load clientes');
-  }
-}
-
-class Trabajadores extends StatelessWidget{
+class _InventarioState extends State<Inventario> {
 
     int _selectedOption = 1;
 
@@ -118,7 +68,7 @@ class Trabajadores extends StatelessWidget{
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Trabajadores',
+                    'Inventario Inicial',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -148,15 +98,36 @@ class Trabajadores extends StatelessWidget{
                       color: const Color.fromARGB(255, 40, 42, 43),
                     ),
                   ),
-                  labelText: 'Codigo del Trabajador',
-                  hintText: 'Ingrese el codigo del Trabajador',
+                  labelText: 'Nombre del Libro',
+                  hintText: 'Ingrese el nombre del Libro',
                 ),
               ),
               SizedBox(height: 16),
+              Expanded(
+                  child: DropdownButton<int>(
+                    value: _selectedOption,
+                    onChanged: (int? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedOption = newValue;
+                        });
+                      }
+                    },
+                    items: [
+                      DropdownMenuItem<int>(
+                        value: 1,
+                        child: Text("Administrador"),
+                      ),
+                      DropdownMenuItem<int>(
+                        value: 2,
+                        child: Text("Cajero"),
+                      ),
+                    ],
+                  ),
+                ),
+              SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   primary: Color.fromARGB(255, 250, 205, 5),
                   shape: RoundedRectangleBorder(

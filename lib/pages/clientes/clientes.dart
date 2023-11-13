@@ -1,68 +1,24 @@
 import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
-import '../trabajadores/agre_traba.dart';
-import '../trabajadores/edi_traba.dart';
-import 'package:http/http.dart'as http;
+import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../clientes/agregar_cliente.dart';
+import '../clientes/editar_cliente.dart';
+import '../clientes/detalle_cliente.dart';
+import '../modelos/cliente_modelo.dart';
 
-class Trabajadoress {
-  final String title;
-  final String subtitle;
+// Desde el api service
 
-  Trabajadoress({required this.title, required this.subtitle});
-}
-
-List<Trabajadoress> libros = [
-  Trabajadoress(title: 'Xxxx', subtitle: 'Xxxxx'),
-];
-
-class Persona {
-  final String nombre;
-  final String dni;
-  final String apellidos;
-  final String codigo;
-
-  Persona({
-    required this.nombre,
-    required this.apellidos,
-    required this.dni,
-    required this.codigo,
-  });
-}
-
-class TrabajadorModelo {
-  final int idTrabajador;
-  final String nombrePersona;
-  final String apellidosPersona;
-  final String codigoTrabajador;
-
-  TrabajadorModelo(
-      {required this.idTrabajador,
-      required this.nombrePersona,
-      required this.apellidosPersona,
-      required this.codigoTrabajador});
-
-  factory TrabajadorModelo.fromJson(Map<String, dynamic> json) {
-    print(json);
-    return TrabajadorModelo(
-      idTrabajador: json['idTrabajador'] as int,
-      nombrePersona: json['persona']['nombre'] as String,
-      apellidosPersona: json['persona']['apellidos'] as String,
-      codigoTrabajador: json['persona']['codigo'] as String,
-    );
-  }
-}
-
-List<TrabajadorModelo> clienteModeloFromJson(String str) {
+List<ClienteModelo> clienteModeloFromJson(String str) {
   final jsonData = json.decode(str);
-  return List<TrabajadorModelo>.from(
-      jsonData.map((x) => TrabajadorModelo.fromJson(x)));
+  return List<ClienteModelo>.from(
+      jsonData.map((x) => ClienteModelo.fromJson(x)));
 }
 
-Future<List<TrabajadorModelo>> fetchClientesModelo() async {
+Future<List<ClienteModelo>> fetchClientesModelo() async {
   final response =
-      await http.get(Uri.parse('http://localhost:8080/api/trabajadores/listar'));
+      await http.get(Uri.parse('http://localhost:8080/api/clientes/listar'));
 
   if (response.statusCode == 200) {
     // Parsear JSON
@@ -73,9 +29,31 @@ Future<List<TrabajadorModelo>> fetchClientesModelo() async {
   }
 }
 
-class Trabajadores extends StatelessWidget{
+class Clientes extends StatefulWidget {
+  @override
+  _ClientesState createState() => _ClientesState();
+}
 
-    int _selectedOption = 1;
+class _ClientesState extends State<Clientes> {
+  List<ClienteModelo> _clientes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchClientesModelo().then((clientes) {
+      setState(() {
+        _clientes = clientes;
+      });
+    });
+  }
+
+  void actualizarClientes() {
+    fetchClientesModelo().then((clientes) {
+      setState(() {
+        _clientes = clientes;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +96,7 @@ class Trabajadores extends StatelessWidget{
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Trabajadores',
+                    'Clientes',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -127,9 +105,9 @@ class Trabajadores extends StatelessWidget{
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
-                      // Agrega la lógica de refresco aquí
+                      actualizarClientes();
                     },
-                  ),
+                  )
                 ],
               ),
               SizedBox(height: 16),
@@ -148,23 +126,24 @@ class Trabajadores extends StatelessWidget{
                       color: const Color.fromARGB(255, 40, 42, 43),
                     ),
                   ),
-                  labelText: 'Codigo del Trabajador',
-                  hintText: 'Ingrese el codigo del Trabajador',
+                  labelText: 'Nombre del DNI',
+                  hintText: 'Ingrese el numero del DNI',
                 ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {
-                  
+                  // Agrega la lógica para el botón aquí
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 250, 205, 5),
+                  primary:
+                      Color.fromARGB(255, 250, 205, 5), // Color de fondo negro
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: Container(
-                  width: double.infinity,
+                  width: double.infinity, // Ancho máximo
                   padding: EdgeInsets.symmetric(
                       vertical:
                           8.0), // Ajusta el valor vertical para cambiar la altura del botón
@@ -179,13 +158,13 @@ class Trabajadores extends StatelessWidget{
                   ),
                 ),
               ),
-              SizedBox(height: 12),
+              SizedBox(height: 9),
               ElevatedButton(
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
-                      return ModalAgregar(); // Llama al widget del modal
+                      return AgregarCliente(); // Llama al widget del modal
                     },
                   );
                 },
@@ -213,7 +192,7 @@ class Trabajadores extends StatelessWidget{
               ),
               SizedBox(height: 16),
               Column(
-                children: libros.map((libro) {
+                children: _clientes.map((cliente) {
                   return Card(
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
@@ -224,24 +203,33 @@ class Trabajadores extends StatelessWidget{
                     child: ListTile(
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       title: Text(
-                        libro.title,
+                        'DNI: ${cliente.dniPersona}',
                         style: TextStyle(
-                          color: Colors
-                              .black, // Cambiamos el color del título a negro
-                          fontWeight:
-                              FontWeight.bold, // Hacemos el título en negrita
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       subtitle: Text(
-                        libro.subtitle,
+                        '${cliente.apellidosPersona} ${cliente.nombrePersona}',
                         style: TextStyle(
-                          color: Colors
-                              .black, // Cambiamos el color del subtítulo a negro
+                          color: Colors.black,
                         ),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            icon: Icon(Icons.visibility,
+                                color: Colors.black), // Icono de editar negro
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return DetalleCliente(); // Llama al widget del modal
+                                },
+                              );
+                            },
+                          ),
                           IconButton(
                             icon: Icon(Icons.edit,
                                 color: Colors.blue), // Icono de editar azul
@@ -249,7 +237,7 @@ class Trabajadores extends StatelessWidget{
                               showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return ModalEditarTraba(); // Llama al widget del modal
+                                  return EditarCliente(); // Llama al widget del modal
                                 },
                               );
                             },

@@ -1,82 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:projectfinal/pages/proveedores/editar_proveedor.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
-import '../trabajadores/agre_traba.dart';
-import '../trabajadores/edi_traba.dart';
-import 'package:http/http.dart'as http;
-import 'dart:convert';
+import '../proveedores/agregar_proveedor.dart';
 
-class Trabajadoress {
+class LibroData {
   final String title;
   final String subtitle;
 
-  Trabajadoress({required this.title, required this.subtitle});
+  LibroData({required this.title, required this.subtitle});
 }
 
-List<Trabajadoress> libros = [
-  Trabajadoress(title: 'Xxxx', subtitle: 'Xxxxx'),
+List<LibroData> libros = [
+  LibroData(title: 'Xxxxx', subtitle: 'Xxxxx'),
 ];
 
-class Persona {
-  final String nombre;
-  final String dni;
-  final String apellidos;
-  final String codigo;
-
-  Persona({
-    required this.nombre,
-    required this.apellidos,
-    required this.dni,
-    required this.codigo,
-  });
-}
-
-class TrabajadorModelo {
-  final int idTrabajador;
-  final String nombrePersona;
-  final String apellidosPersona;
-  final String codigoTrabajador;
-
-  TrabajadorModelo(
-      {required this.idTrabajador,
-      required this.nombrePersona,
-      required this.apellidosPersona,
-      required this.codigoTrabajador});
-
-  factory TrabajadorModelo.fromJson(Map<String, dynamic> json) {
-    print(json);
-    return TrabajadorModelo(
-      idTrabajador: json['idTrabajador'] as int,
-      nombrePersona: json['persona']['nombre'] as String,
-      apellidosPersona: json['persona']['apellidos'] as String,
-      codigoTrabajador: json['persona']['codigo'] as String,
-    );
-  }
-}
-
-List<TrabajadorModelo> clienteModeloFromJson(String str) {
-  final jsonData = json.decode(str);
-  return List<TrabajadorModelo>.from(
-      jsonData.map((x) => TrabajadorModelo.fromJson(x)));
-}
-
-Future<List<TrabajadorModelo>> fetchClientesModelo() async {
-  final response =
-      await http.get(Uri.parse('http://localhost:8080/api/trabajadores/listar'));
-
-  if (response.statusCode == 200) {
-    // Parsear JSON
-    return clienteModeloFromJson(response.body);
-  } else {
-    // Manejar error
-    throw Exception('Failed to load clientes');
-  }
-}
-
-class Trabajadores extends StatelessWidget{
-
-    int _selectedOption = 1;
-
+class Proveedor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +57,7 @@ class Trabajadores extends StatelessWidget{
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Trabajadores',
+                    'Proveedores',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -148,15 +87,13 @@ class Trabajadores extends StatelessWidget{
                       color: const Color.fromARGB(255, 40, 42, 43),
                     ),
                   ),
-                  labelText: 'Codigo del Trabajador',
-                  hintText: 'Ingrese el codigo del Trabajador',
+                  labelText: 'Nombre del Proveedor',
+                  hintText: 'Ingrese el nombre del Proveedor',
                 ),
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   primary: Color.fromARGB(255, 250, 205, 5),
                   shape: RoundedRectangleBorder(
@@ -185,7 +122,7 @@ class Trabajadores extends StatelessWidget{
                   showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
-                      return ModalAgregar(); // Llama al widget del modal
+                      return AgregarProvee(); // Llama al widget del modal
                     },
                   );
                 },
@@ -249,7 +186,7 @@ class Trabajadores extends StatelessWidget{
                               showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return ModalEditarTraba(); // Llama al widget del modal
+                                  return EditarProvee(); // Llama al widget del modal
                                 },
                               );
                             },

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
-import '../clientes.dart';
+import '../clientes/clientes.dart';
 import '../ventas/ventas2.dart';
 
 class LibroData {
@@ -12,9 +12,7 @@ class LibroData {
 }
 
 List<LibroData> libros = [
-  LibroData(title: '72227724', subtitle: 'Jorge Luis Mendez'),
-  LibroData(title: '72227710', subtitle: 'Jhon Sthev Gallardo'),
-  LibroData(title: '72227723', subtitle: 'Miguel Zarate Perez'),
+  LibroData(title: 'Xxxx', subtitle: 'Xxxx'),
 ];
 
 class VentaPrin extends StatelessWidget {
