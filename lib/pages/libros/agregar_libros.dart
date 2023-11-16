@@ -8,10 +8,11 @@ class AgregarLibros extends StatefulWidget {
 }
 
 class _AgregarLibrosState extends State<AgregarLibros> {
-  final TextEditingController nombreController = TextEditingController();
-  final TextEditingController apellidosController = TextEditingController();
-  final TextEditingController dniController = TextEditingController();
-  final TextEditingController telefonoController = TextEditingController();
+  final TextEditingController codigoController = TextEditingController();
+  final TextEditingController tituloController = TextEditingController();
+  final TextEditingController paginasController = TextEditingController();
+  final TextEditingController stockController = TextEditingController();
+  final TextEditingController precioController = TextEditingController();
 
   String? selectedCategory;
   String? selectedEditorial;
@@ -87,6 +88,35 @@ class _AgregarLibrosState extends State<AgregarLibros> {
     }
   }
 
+  Future<void> createLibro() async {
+    final response = await http.post(
+      Uri.parse('http://localhost:8080/api/libros/crear'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'codigo': codigoController.text,
+        'titulo': tituloController.text,
+        'categoria': selectedCategory,
+        'editorial': selectedEditorial,
+        'autor': selectedAuthor,
+        'numPaginas': paginasController.text,
+        'stock': stockController.text,
+        'precioVenta': precioController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Libro creado exitosamente
+      print('Libro creado exitosamente');
+      // Puedes agregar lógica adicional aquí si lo necesitas
+    } else {
+      // Error al crear el libro
+      print('Error al crear el libro: ${response.statusCode}');
+      // Puedes manejar el error de acuerdo a tus necesidades
+    }
+  }
+
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
@@ -105,6 +135,7 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             ),
             SizedBox(height: 20),
             TextFormField(
+              controller: codigoController,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(16.0),
                 border: OutlineInputBorder(
@@ -125,6 +156,7 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             ),
             SizedBox(height: 10),
             TextFormField(
+              controller: tituloController,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(16.0),
                 border: OutlineInputBorder(
@@ -211,6 +243,7 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             ),
             SizedBox(height: 10),
             TextFormField(
+              controller: paginasController,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(16.0),
                 border: OutlineInputBorder(
@@ -231,6 +264,7 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             ),
             SizedBox(height: 10),
             TextFormField(
+              controller: stockController,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(16.0),
                 border: OutlineInputBorder(
@@ -251,12 +285,11 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             ),
             SizedBox(height: 10),
             TextFormField(
-              style:
-                  TextStyle(fontSize: 14), // Reducimos el tamaño de la fuente
+              controller: precioController,
+              style:TextStyle(fontSize: 14),
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8), // Reducimos el espacio interno
+                    horizontal: 12, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
                       4.0), // Reducimos el radio de los bordes
@@ -279,7 +312,7 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                // Agrega la lógica para el botón aquí
+              createLibro();
               },
               style: ElevatedButton.styleFrom(
                 primary: Color.fromARGB(255, 53, 75, 245),
