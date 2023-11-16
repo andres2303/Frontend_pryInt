@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Persona {
   final String nombre;
   final String dni;
@@ -48,8 +50,33 @@ class ClienteModelo {
   Map<String, dynamic> toJson() {
     return {
       'idCliente': idCliente,
-      'persona': persona.toJson(),
-      'estado': estado, // Add this line
+      'persona': {
+        'nombre': persona.nombre,
+        'apellidos': persona.apellidos,
+        'dni': persona.dni,
+        'telefono': persona.telefono,
+      },
+      'estado': estado,
     };
   }
+}
+
+List<ClienteModelo> clienteModeloFromJson(String str) {
+  final jsonData = json.decode(str);
+  List<ClienteModelo> clientes = [];
+
+  for (var item in jsonData) {
+    clientes.add(ClienteModelo(
+      idCliente: item['idCliente'].toString(),
+      persona: Persona(
+        nombre: item['persona']['nombre'] as String,
+        apellidos: item['persona']['apellidos'] as String,
+        dni: item['persona']['dni'].toString(),
+        telefono: item['persona']['telefono'].toString(),
+      ),
+      estado: item['estado'] as bool,
+    ));
+  }
+
+  return clientes;
 }

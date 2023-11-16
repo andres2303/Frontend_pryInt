@@ -126,8 +126,7 @@ class _ClientesState extends State<Clientes> {
               SizedBox(height: 16),
               TextFormField(
                 controller: dniController,
-                keyboardType: TextInputType
-                    .number,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.all(16.0),
                   border: OutlineInputBorder(
@@ -142,7 +141,7 @@ class _ClientesState extends State<Clientes> {
                       color: const Color.fromARGB(255, 40, 42, 43),
                     ),
                   ),
-                  labelText:'Número del DNI',
+                  labelText: 'Número del DNI',
                   hintText: 'Ingrese el número del DNI',
                 ),
               ),
@@ -237,7 +236,8 @@ class _ClientesState extends State<Clientes> {
                               showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return DetalleCliente();
+                                  // Aquí debes pasar el cliente específico seleccionado
+                                  return DetalleCliente(cliente: cliente);
                                 },
                               );
                             },
