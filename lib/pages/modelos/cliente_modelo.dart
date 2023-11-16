@@ -22,39 +22,34 @@ class Persona {
 }
 
 class ClienteModelo {
-  final String idCliente;
-  final String nombrePersona;
-  final String apellidosPersona;
-  final String dniPersona;
-  final String telefonoPersona;
+  String idCliente;
+  Persona persona; 
+  bool estado;
 
   ClienteModelo({
     required this.idCliente,
-    required this.nombrePersona,
-    required this.apellidosPersona,
-    required this.dniPersona,
-    required this.telefonoPersona,
+    required this.persona, 
+    this.estado = true, 
   });
 
   factory ClienteModelo.fromJson(Map<String, dynamic> json) {
     return ClienteModelo(
       idCliente: json['idCliente'].toString(),
-      nombrePersona: json['persona']['nombre'] as String,
-      apellidosPersona: json['persona']['apellidos'] as String,
-      dniPersona: json['persona']['dni'].toString(),
-      telefonoPersona: json['persona']['telefono'].toString(),
+      persona: Persona(
+        nombre: json['persona']['nombre'] as String,
+        apellidos: json['persona']['apellidos'] as String,
+        dni: json['persona']['dni'] .toString(),
+        telefono: json['persona']['telefono'].toString(),
+      ),
+      estado: json['estado'] as bool, 
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'idCliente': idCliente,
-      'persona': {
-        'nombre': nombrePersona,
-        'apellidos': apellidosPersona,
-        'dni': dniPersona,
-        'telefono': telefonoPersona,
-      },
+      'persona': persona.toJson(),
+      'estado': estado, // Add this line
     };
   }
 }

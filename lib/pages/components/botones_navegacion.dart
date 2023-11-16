@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../libros.dart'; // Ajusta la ruta a tu archivo 'libros.dart'
+import '../libros/libros.dart'; // Ajusta la ruta a tu archivo 'libros.dart'
 import '../clientes/clientes.dart'; // Ajusta la ruta a tu archivo 'clientes.dart'
 import '../proveedores/proveedor.dart'; // Ajusta la ruta a tu archivo 'proveedor.dart'
 

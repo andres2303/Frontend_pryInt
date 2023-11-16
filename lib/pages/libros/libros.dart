@@ -1,70 +1,123 @@
 import 'package:flutter/material.dart';
-import '../components/drawer.dart';
+import 'package:projectfinal/pages/libros/agregar_libros.dart';
 import '../components/botones_navegacion.dart';
+import '../components/drawer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../clientes/agregar_cliente.dart';
-import '../clientes/editar_cliente.dart';
-import '../clientes/detalle_cliente.dart';
-import '../modelos/cliente_modelo.dart';
+import '../libros/detalle_libros.dart';
+import '../libros/editar_libros.dart';
+import '../modelos/libros_modelo.dart';
 
-class Clientes extends StatefulWidget {
-  @override
-  _ClientesState createState() => _ClientesState();
+// Desde el api service
+
+List<LibroModelo> libroModeloFromJson(String str) {
+  final jsonData = json.decode(str);
+  return List<LibroModelo>.from(jsonData.map((x) => LibroModelo.fromJson(x)));
 }
 
-class _ClientesState extends State<Clientes> {
-  List<ClienteModelo> _clientes = [];
-  TextEditingController dniController = TextEditingController();
+Future<List<LibroModelo>> fetchLibrosModelo() async {
+  try {
+    final response =
+        await http.get(Uri.parse('http://localhost:8080/api/libros/listar'));
+
+    if (response.statusCode == 200) {
+      // Parsear JSON
+      return libroModeloFromJson(response.body);
+    } else {
+      // Manejar error
+      throw Exception(
+          'Failed to load libros. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    // Manejar errores de red u otros errores
+    throw Exception('Error en la solicitud HTTP: $e');
+  }
+}
+
+class LibroService {
+  Future<void> deleteLibro(int id) async {
+    final response = await http
+        .delete(Uri.parse('http://localhost:8080/api/libros/eliminar/$id'));
+
+    if (response.statusCode == 204) {
+      // El libro se eliminó correctamente
+      print('Libro eliminado');
+    } else {
+      // Ocurrió un error al eliminar el libro
+      print('Error al eliminar el libro');
+    }
+  }
+}
+
+class Libro extends StatefulWidget {
+  @override
+  _LibroState createState() => _LibroState();
+}
+
+class LibroData {
+  final int id;
+  final String title;
+  final String subtitle;
+
+  LibroData({required this.id, required this.title, required this.subtitle});
+}
+
+class _LibroState extends State<Libro> {
+  String? seleccionarEdito;
+  String? selectedCategory;
+  List<String> categoryList = [];
+  List<LibroData> libros = [];
+  final LibroService libroService = LibroService();
 
   @override
   void initState() {
     super.initState();
-    fetchClientesModelo().then((clientes) {
+
+    // Llamar a la función para obtener la lista de categorías
+    fetchCategories().then((categories) {
       setState(() {
-        _clientes = clientes;
+        categoryList = categories;
       });
     });
+
+    // Obtener la lista de libros
+    actualizarLibros();
   }
 
-  void actualizarClientes() {
-    fetchClientesModelo().then((clientes) {
-      setState(() {
-        _clientes = clientes;
-      });
-    });
-  }
+  Future<List<String>> fetchCategories() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://localhost:8080/api/categorias/listar'));
 
-  Future<List<ClienteModelo>> fetchClientesModelo() async {
-    final response =
-        await http.get(Uri.parse('http://localhost:8080/api/clientes/listar'));
-
-    if (response.statusCode == 200) {
-      return clienteModeloFromJson(response.body);
-    } else {
-      throw Exception('Failed to load clientes');
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        // Mapear la lista de categorías desde el JSON
+        List<String> categories = jsonData.map((category) {
+          return category['nombre'].toString();
+        }).toList();
+        return categories;
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      throw Exception('Error en la solicitud HTTP: $e');
     }
   }
 
-  Future<void> buscarPorDNI() async {
-    final dni = dniController.text;
-
-    if (dni.isNotEmpty) {
-      try {
-        final response = await http.get(
-          Uri.parse('http://localhost:8080/api/clientes/buscarPorDNI/$dni'),
-        );
-
-        if (response.statusCode == 200) {
-          setState(() {
-            _clientes = clienteModeloFromJson(response.body);
-          });
-        } else {
-          throw Exception('Failed to load clientes');
-        }
-      } catch (e) {
-        print('Error: $e');
-      }
+  Future<void> actualizarLibros() async {
+    try {
+      final fetchedLibros = await fetchLibrosModelo();
+      setState(() {
+        libros = fetchedLibros.map((libroModelo) {
+          return LibroData(
+            id: libroModelo.idLibro,
+            title: 'Codigo: ${libroModelo.codigo}',
+            subtitle: libroModelo.titulo,
+          );
+        }).toList();
+      });
+    } catch (e) {
+      print('Error al actualizar libros: $e');
     }
   }
 
@@ -109,7 +162,7 @@ class _ClientesState extends State<Clientes> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Clientes',
+                    'Libros',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -118,16 +171,13 @@ class _ClientesState extends State<Clientes> {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
-                      actualizarClientes();
+                      actualizarLibros();
                     },
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: 16),
               TextFormField(
-                controller: dniController,
-                keyboardType: TextInputType
-                    .number,
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.all(16.0),
                   border: OutlineInputBorder(
@@ -142,24 +192,51 @@ class _ClientesState extends State<Clientes> {
                       color: const Color.fromARGB(255, 40, 42, 43),
                     ),
                   ),
-                  labelText:'Número del DNI',
-                  hintText: 'Ingrese el número del DNI',
+                  labelText: 'Nombre de Libro',
+                  hintText: 'Ingrese el nombre del Libro',
                 ),
               ),
-              SizedBox(height: 12),
+              SizedBox(height: 16),
+              DropdownButton<String>(
+                isExpanded: true,
+                value: selectedCategory,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedCategory = newValue;
+                  });
+                },
+                items: [
+                  // Placeholder
+                  DropdownMenuItem<String>(
+                    value: null,
+                    child: Text('Seleccionar Categoria'),
+                  ),
+                  // Categorías reales
+                  ...categoryList.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ],
+              ),
+              SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  buscarPorDNI();
+                  // Agrega la lógica para el botón aquí
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 250, 205, 5),
+                  primary:
+                      Color.fromARGB(255, 250, 205, 5), // Color de fondo negro
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  width: double.infinity, // Ancho máximo
+                  padding: EdgeInsets.symmetric(
+                      vertical:
+                          8.0), // Ajusta el valor vertical para cambiar la altura del botón
                   child: Center(
                     child: Text(
                       "Buscar",
@@ -171,13 +248,13 @@ class _ClientesState extends State<Clientes> {
                   ),
                 ),
               ),
-              SizedBox(height: 9),
+              SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () {
                   showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
-                      return AgregarCliente(); // Llama al widget del modal
+                      return AgregarLibros();
                     },
                   );
                 },
@@ -205,25 +282,27 @@ class _ClientesState extends State<Clientes> {
               ),
               SizedBox(height: 16),
               Column(
-                children: _clientes.map((cliente) {
+                children: libros.map((libro) {
                   return Card(
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    color: Colors.white,
+                    color: Colors.white, // Cambiamos el color de fondo a blanco
                     child: ListTile(
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       title: Text(
-                        'DNI: ${cliente.persona.dni}',
+                        libro.title,
                         style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
+                          color: Colors
+                              .black, // Cambiamos el color del título a negro
+                          fontWeight:
+                              FontWeight.bold, // Hacemos el título en negrita
                         ),
                       ),
                       subtitle: Text(
-                        '${cliente.persona.apellidos} ${cliente.persona.nombre}',
+                        libro.subtitle,
                         style: TextStyle(
                           color: Colors.black,
                         ),
@@ -232,12 +311,13 @@ class _ClientesState extends State<Clientes> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.visibility, color: Colors.black),
+                            icon: Icon(Icons.visibility,
+                                color: Colors.black), // Icono de editar negro
                             onPressed: () {
                               showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return DetalleCliente();
+                                  return DetalleLibros();
                                 },
                               );
                             },
@@ -248,15 +328,17 @@ class _ClientesState extends State<Clientes> {
                               showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return EditarCliente();
+                                  return EditarLibros();
                                 },
                               );
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
+                            icon: Icon(Icons.delete,
+                                color: Colors.red), // Icono de eliminar rojo
                             onPressed: () {
                               // Lógica para borrar aquí
+                              LibroService().deleteLibro(libro.id);
                             },
                           ),
                         ],

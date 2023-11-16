@@ -1,85 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../modelos/cliente_modelo.dart';
 
-class AgregarCliente extends StatefulWidget {
+class EditarLibros extends StatefulWidget {
   @override
-  _AgregarClienteState createState() => _AgregarClienteState();
+  _EditarLibrosState createState() => _EditarLibrosState();
 }
 
-class _AgregarClienteState extends State<AgregarCliente> {
-  final TextEditingController nombreController = TextEditingController();
-  final TextEditingController apellidosController = TextEditingController();
-  final TextEditingController dniController = TextEditingController();
-  final TextEditingController telefonoController = TextEditingController();
-
-  int? idPersona; // Nueva variable para almacenar el ID de la persona
-
-  Future<void> agregarPersonaYCliente() async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://localhost:8080/api/personas/crear'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'nombre': nombreController.text,
-          'apellidos': apellidosController.text,
-          'dni': dniController.text,
-          'telefono': telefonoController.text,
-        }),
-      );
-
-      print('Respuesta del servidor al agregar persona: ${response.body}');
-
-      if (response.statusCode == 201) {
-        setState(() {
-          idPersona = jsonDecode(response.body)['idPersona'];
-        });
-        print('ID de la persona: $idPersona');
-
-        if (idPersona != null) {
-          ClienteModelo nuevoCliente = ClienteModelo(
-            idCliente: idPersona.toString(),
-            persona: Persona(
-              nombre: nombreController.text,
-              apellidos: apellidosController.text,
-              dni: dniController.text,
-              telefono: telefonoController.text,
-            ),
-            estado: true,
-          );
-
-          final clienteResponse = await http.post(
-            Uri.parse('http://localhost:8080/api/clientes/crear'),
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: jsonEncode(nuevoCliente.toJson()),
-          );
-
-          print(
-              'Respuesta del servidor al agregar cliente: ${clienteResponse.body}');
-
-          if (clienteResponse.statusCode == 201) {
-            print('Cliente agregado exitosamente');
-          } else {
-            print('Error al agregar cliente: ${clienteResponse.body}');
-            throw Exception('Error al agregar cliente');
-          }
-        } else {
-          print('Error: No se obtuvo el ID de la persona');
-        }
-      } else {
-        print('Error al agregar persona: ${response.body}');
-        throw Exception('Error al agregar persona');
-      }
-    } catch (e) {
-      print('Error: $e');
-      throw Exception('Error al agregar persona y cliente');
-    }
-  }
+class _EditarLibrosState extends State<EditarLibros> {
+  String? seleccionarCate;
+  String? seleccionarEdito;
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +19,7 @@ class _AgregarClienteState extends State<AgregarCliente> {
           children: <Widget>[
             SizedBox(height: 10),
             Text(
-              "Agregar Cliente",
+              "Editar libro",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -100,7 +28,6 @@ class _AgregarClienteState extends State<AgregarCliente> {
             ),
             SizedBox(height: 20),
             TextFormField(
-              controller: nombreController,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(16.0),
                 border: OutlineInputBorder(
@@ -115,13 +42,12 @@ class _AgregarClienteState extends State<AgregarCliente> {
                     color: const Color.fromARGB(255, 50, 53, 56),
                   ),
                 ),
-                labelText: 'Nombre Completo',
-                hintText: 'Ingrese los nombres',
+                labelText: 'Codigo',
+                hintText: 'Ingrese el codigo',
               ),
             ),
             SizedBox(height: 10),
             TextFormField(
-              controller: apellidosController,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(16.0),
                 border: OutlineInputBorder(
@@ -136,13 +62,66 @@ class _AgregarClienteState extends State<AgregarCliente> {
                     color: const Color.fromARGB(255, 50, 53, 56),
                   ),
                 ),
-                labelText: 'Apellido Completo',
-                hintText: 'Ingrese los apellidos',
+                labelText: 'Titulo',
+                hintText: 'Ingrese el titulo',
+              ),
+            ),
+            SizedBox(height: 10),
+            DropdownButton<String>(
+              isExpanded: true,
+              value: seleccionarCate, // Valor inicial es null o vacío
+              onChanged: (String? newValue) {
+                setState(() {
+                  seleccionarCate = newValue;
+                });
+              },
+              items: <String>['Deporte', 'Manga', 'Cocina']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 10),
+            DropdownButton<String>(
+              isExpanded: true,
+              value: seleccionarEdito, // Valor inicial es null o vacío
+              onChanged: (String? newValue) {
+                setState(() {
+                  seleccionarEdito = newValue;
+                });
+              },
+              items: <String>['Chipre', 'Universal', 'Son']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                labelText: 'N° Paginas',
+                hintText: 'Ingrese el n° paginas',
               ),
             ),
             SizedBox(height: 10),
             TextFormField(
-              controller: dniController,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.all(16.0),
                 border: OutlineInputBorder(
@@ -157,38 +136,45 @@ class _AgregarClienteState extends State<AgregarCliente> {
                     color: const Color.fromARGB(255, 50, 53, 56),
                   ),
                 ),
-                labelText: 'DNI',
-                hintText: 'Ingrese el N° DNI',
+                labelText: 'Stock',
+                hintText: 'Ingrese el stock',
               ),
             ),
             SizedBox(height: 10),
             TextFormField(
-              controller: telefonoController,
+              style:
+                  TextStyle(fontSize: 14), // Reducimos el tamaño de la fuente
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.all(16.0),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8), // Reducimos el espacio interno
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(
+                      4.0), // Reducimos el radio de los bordes
                   borderSide: BorderSide(
                     color: const Color.fromARGB(255, 50, 53, 56),
+                    width: 1, // Reducimos el grosor del borde
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(4.0),
                   borderSide: BorderSide(
                     color: const Color.fromARGB(255, 50, 53, 56),
+                    width: 1,
                   ),
                 ),
-                labelText: 'Telefono',
-                hintText: 'Ingrese el n° telefonico',
+                labelText: 'Precio Venta',
+                hintText: 'Ingrese el precio de venta',
               ),
             ),
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                agregarPersonaYCliente();
+                // Agrega la lógica para el botón aquí
               },
               style: ElevatedButton.styleFrom(
-                primary: Color.fromARGB(255, 53, 75, 245),
+                primary: Color.fromARGB(
+                    255, 18, 94, 25), // Cambiamos el color al valor hexadecimal
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -198,7 +184,7 @@ class _AgregarClienteState extends State<AgregarCliente> {
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Center(
                   child: Text(
-                    "Agregar",
+                    "Guardar",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -207,9 +193,11 @@ class _AgregarClienteState extends State<AgregarCliente> {
                 ),
               ),
             ),
+            SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 }
+
