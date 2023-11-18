@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
 import '../clientes/clientes.dart';
+import 'dart:convert';
 import '../ventas/ventas2.dart';
 import 'package:http/http.dart' as http;
 import '../modelos/ventas_modelo.dart';
@@ -16,10 +17,35 @@ class _VentaPrinState extends State<VentaPrin> {
     LibroData(title: 'Xxxx', subtitle: 'Xxxx'),
   ];
 
-  List<ClienteModelo> _clientes = [];
+  List<ClienteModel> _clientes = [];
+  List<VentaModel> ventas = [];
   TextEditingController dniController = TextEditingController();
 
-    Future<void> buscarPorDNI() async {
+  @override
+  void initState() {
+    super.initState();
+    _fetchVentas();
+  }
+
+  Future<void> _fetchVentas() async {
+    final response =
+        await http.get(Uri.parse('http://localhost:8080/api/ventas/listar'));
+
+    if (response.statusCode == 200) {
+      // La solicitud fue exitosa, analiza el JSON
+      List<dynamic> jsonData = json.decode(response.body);
+
+      setState(() {
+        ventas = jsonData.map((json) => VentaModel.fromJson(json)).toList();
+      });
+    } else {
+      // Si la solicitud no fue exitosa, muestra un mensaje de error
+      print(
+          'Error al cargar las ventas. Código de estado: ${response.statusCode}');
+    }
+  }
+
+  Future<void> buscarPorDNI() async {
     final dni = dniController.text;
 
     if (dni.isNotEmpty) {
@@ -116,7 +142,8 @@ class _VentaPrinState extends State<VentaPrin> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 8), // Espacio entre el TextFormField y los iconos
+                  SizedBox(
+                      width: 8), // Espacio entre el TextFormField y los iconos
                   IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () {
@@ -145,8 +172,7 @@ class _VentaPrinState extends State<VentaPrin> {
                   ),
                   IconButton(
                     icon: Icon(Icons.refresh),
-                    onPressed: () {
-                    },
+                    onPressed: () {},
                   ),
                   /*SizedBox(width: 8),
                   IconButton(
@@ -182,6 +208,7 @@ class _VentaPrinState extends State<VentaPrin> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -189,7 +216,7 @@ class _VentaPrinState extends State<VentaPrin> {
               ),
               SizedBox(height: 16),
               Column(
-                children: libros.map((libro) {
+                children: ventas.map((venta) {
                   return Card(
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
@@ -200,34 +227,40 @@ class _VentaPrinState extends State<VentaPrin> {
                     child: ListTile(
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       title: Text(
-                        libro.title,
+                         '${venta.cliente.persona.apellidos}, ${venta.cliente.persona.nombre}',
                         style: TextStyle(
-                          color: Colors.black, // Cambiamos el color del título a negro
+                          color: Colors
+                              .black, // Cambiamos el color del título a negro
                           fontWeight:
                               FontWeight.bold, // Hacemos el título en negrita
                         ),
                       ),
                       subtitle: Text(
-                        libro.subtitle,
+                        'DNI: ${venta.cliente.persona.dni}',
                         style: TextStyle(
-                          color: Colors.black, // Cambiamos el color del subtítulo a negro
+                          color: Colors
+                              .black, // Cambiamos el color del subtítulo a negro
                         ),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.edit,
-                                color: Colors.blue), 
+                            icon: Icon(Icons.visibility,
+                                color: Colors.black), // Icono de editar negro
                             onPressed: () {
-                              
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete,
-                                color: Colors.red), 
+                            icon: Icon(Icons.edit, color: Colors.blue),
                             onPressed: () {
-                              
+                              // Agrega la lógica para editar la venta
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              // Agrega la lógica para eliminar la venta
                             },
                           ),
                         ],

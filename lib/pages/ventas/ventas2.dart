@@ -59,9 +59,9 @@ class _Venta2State extends State<Venta2> {
     LibroData(title: 'XXX', subtitle: 'Xxxx'),
   ];
 
-  List<ClienteModelo> _clientes = [];
+  List<ClienteModel> _clientes = [];
 
-  Future<List<ClienteModelo>> buscarPorDNI() async {
+  Future<List<ClienteModel>> buscarPorDNI() async {
     final dni = dniController.text;
 
     if (dni.isNotEmpty) {
@@ -517,6 +517,7 @@ class _Venta2State extends State<Venta2> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
