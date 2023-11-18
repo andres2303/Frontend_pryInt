@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
 import '../modelos/ventas_modelo.dart';
+import '../modelos/libros_modelo.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LibroData {
   final String title;
   final String subtitle;
 
   LibroData({required this.title, required this.subtitle});
+}
+
+List<LibroModelo> libroModeloFromJson(String str) {
+  final jsonData = json.decode(str);
+  return List<LibroModelo>.from(jsonData.map((x) => LibroModelo.fromJson(x)));
 }
 
 class Venta2 extends StatefulWidget {
@@ -23,12 +31,96 @@ class _Venta2State extends State<Venta2> {
   final TextEditingController precioventaController = TextEditingController();
   final TextEditingController subtotalController = TextEditingController();
   final TextEditingController dniController = TextEditingController();
+  final TextEditingController categoriaController = TextEditingController();
+
+    @override
+  void initState() {
+    super.initState();
+
+    // Agregar un listener para el campo de cantidad
+    cantidadController.addListener(() {
+      // Obtener el valor de cantidad como un número
+      double cantidad = double.tryParse(cantidadController.text) ?? 0.0;
+
+      // Obtener el valor de precio como un número
+      double precio = double.tryParse(precioventaController.text) ?? 0.0;
+
+      // Calcular el subtotal
+      double subtotal = cantidad * precio;
+
+      // Actualizar el controlador de texto del subtotal con el nuevo valor
+      subtotalController.text = subtotal.toString();
+    });
+  }
 
   bool mostrarTarjetaBusqueda = false;
 
   List<LibroData> libros = [
     LibroData(title: 'XXX', subtitle: 'Xxxx'),
   ];
+
+  List<ClienteModelo> _clientes = [];
+
+  Future<List<ClienteModelo>> buscarPorDNI() async {
+    final dni = dniController.text;
+
+    if (dni.isNotEmpty) {
+      try {
+        final response = await http.get(
+          Uri.parse('http://localhost:8080/api/clientes/buscarPorDNI/$dni'),
+        );
+
+        if (response.statusCode == 200) {
+          final clientes = clienteModeloFromJson(response.body);
+          return clientes;
+        } else {
+          throw Exception('Failed to load clientes');
+        }
+      } catch (e) {
+        print('Error: $e');
+        return [];
+      }
+    }
+
+    return [];
+  }
+
+  Future<void> buscarPorCodigo() async {
+    final codigo = codigoController.text;
+
+    if (codigo.isNotEmpty) {
+      try {
+        final response = await http.get(
+          Uri.parse(
+            'http://localhost:8080/api/libros/buscarPorCodigo?codigo=$codigo',
+          ),
+        );
+
+        if (response.statusCode == 200) {
+          List<LibroModelo> librosEncontrados =
+              libroModeloFromJson(response.body);
+
+          // Verificar si se encontraron libros
+          if (librosEncontrados.isNotEmpty) {
+            // Obtener el primer libro encontrado
+            LibroModelo primerLibro = librosEncontrados[0];
+
+            // Actualizar el controlador de la categoría y hacerlo de solo lectura
+            setState(() {
+              categoriaController.text = primerLibro.categoria.nombre;
+              libroController.text = primerLibro.titulo;
+              precioventaController.text = primerLibro.precio.toString();
+              stockController.text = primerLibro.stock.toString();
+            });
+          }
+        } else {
+          throw Exception('Failed to load libro');
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,20 +228,20 @@ class _Venta2State extends State<Venta2> {
                   SizedBox(width: 8),
                   IconButton(
                     icon: Icon(Icons.search),
-                    onPressed: () {
+                    onPressed: () async {
+                      final clientes = await buscarPorDNI();
                       setState(() {
+                        _clientes = clientes;
                         mostrarTarjetaBusqueda = true;
                       });
                     },
                   ),
                 ],
               ),
-              if (mostrarTarjetaBusqueda)
+              if (mostrarTarjetaBusqueda && _clientes.isNotEmpty)
                 Container(
                   width: double.infinity,
-                  margin: EdgeInsets.only(
-                      top:
-                          8), // Añadido para dar espacio entre el campo de búsqueda y la tarjeta
+                  margin: EdgeInsets.only(top: 8),
                   child: Card(
                     elevation: 4,
                     margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
@@ -160,14 +252,14 @@ class _Venta2State extends State<Venta2> {
                     child: ListTile(
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       title: Text(
-                        'Cliente de Ejemplo',
+                        '${_clientes[0].persona.apellidos}, ${_clientes[0].persona.nombre}',
                         style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       subtitle: Text(
-                        'Detalles del cliente de ejemplo',
+                        'Teléfono: ${_clientes[0].persona.telefono}',
                         style: TextStyle(
                           color: Colors.black,
                         ),
@@ -214,7 +306,43 @@ class _Venta2State extends State<Venta2> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 8), // Espacio entre los campos de texto
+                  SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      codigoController.clear();
+                      libroController.clear();
+                      cantidadController.clear();
+                      categoriaController.clear();
+                      stockController.clear();
+                      precioventaController.clear();
+                      subtotalController.clear();
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.cleaning_services,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () async {
+                      await buscarPorCodigo();
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Row(
+                children: [
                   Expanded(
                     flex: 2,
                     child: TextFormField(
@@ -238,13 +366,6 @@ class _Venta2State extends State<Venta2> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 8),
-                  IconButton(
-                    icon: Icon(Icons.menu_book),
-                    onPressed: () {
-                      // Agrega la lógica para mostrar un calendario aquí
-                    },
-                  ),
                 ],
               ),
               SizedBox(height: 12),
@@ -253,7 +374,8 @@ class _Venta2State extends State<Venta2> {
                   Expanded(
                     flex: 2,
                     child: TextFormField(
-                      controller: stockController,
+                      controller: categoriaController,
+                      enabled: false,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 16.0,
@@ -271,8 +393,7 @@ class _Venta2State extends State<Venta2> {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'Codigo',
-                        hintText: 'Ingrese el codigo',
+                        labelText: 'Categoria',
                       ),
                     ),
                   ),
@@ -280,6 +401,7 @@ class _Venta2State extends State<Venta2> {
                   Expanded(
                     child: TextFormField(
                       controller: stockController,
+                      enabled: false,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(16.0),
                         border: OutlineInputBorder(
@@ -295,7 +417,6 @@ class _Venta2State extends State<Venta2> {
                           ),
                         ),
                         labelText: 'Stock',
-                        hintText: 'esta predeterminado',
                       ),
                     ),
                   ),
@@ -317,8 +438,7 @@ class _Venta2State extends State<Venta2> {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'Cantidad',
-                        hintText: 'Ingrese la cantidad',
+                        labelText: 'Cant',
                       ),
                     ),
                   ),
@@ -330,6 +450,7 @@ class _Venta2State extends State<Venta2> {
                   Expanded(
                     child: TextFormField(
                       controller: precioventaController,
+                      enabled: false,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 16.0,
@@ -347,8 +468,7 @@ class _Venta2State extends State<Venta2> {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'PrecioVenta',
-                        hintText: 'es predeterminado',
+                        labelText: 'Precio de Venta',
                       ),
                     ),
                   ),
@@ -356,6 +476,7 @@ class _Venta2State extends State<Venta2> {
                   Expanded(
                     child: TextFormField(
                       controller: subtotalController,
+                      enabled: false,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(16.0),
                         border: OutlineInputBorder(
@@ -370,32 +491,7 @@ class _Venta2State extends State<Venta2> {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'SubtTotal',
-                        hintText: 'esta predeterminado',
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  InkWell(
-                    onTap: () {
-                      codigoController.clear();
-                      stockController.clear();
-                      libroController.clear();
-                      cantidadController.clear();
-                      precioventaController.clear();
-                      subtotalController.clear();
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.cleaning_services,
-                          color: Colors.black,
-                        ),
+                        labelText: 'SubTotal',
                       ),
                     ),
                   ),
@@ -457,6 +553,12 @@ class _Venta2State extends State<Venta2> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          IconButton(
+                            icon: Icon(Icons.visibility,
+                                color: Colors.black), // Icono de editar negro
+                            onPressed: () {
+                            },
+                          ),
                           IconButton(
                             icon: Icon(Icons.edit,
                                 color: Colors.blue), // Icono de editar azul
