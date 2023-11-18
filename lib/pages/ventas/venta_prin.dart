@@ -3,19 +3,44 @@ import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
 import '../clientes/clientes.dart';
 import '../ventas/ventas2.dart';
+import 'package:http/http.dart' as http;
+import '../modelos/ventas_modelo.dart';
 
-class LibroData {
-  final String title;
-  final String subtitle;
-
-  LibroData({required this.title, required this.subtitle});
+class VentaPrin extends StatefulWidget {
+  @override
+  _VentaPrinState createState() => _VentaPrinState();
 }
 
-List<LibroData> libros = [
-  LibroData(title: 'Xxxx', subtitle: 'Xxxx'),
-];
+class _VentaPrinState extends State<VentaPrin> {
+  List<LibroData> libros = [
+    LibroData(title: 'Xxxx', subtitle: 'Xxxx'),
+  ];
 
-class VentaPrin extends StatelessWidget {
+  List<ClienteModelo> _clientes = [];
+  TextEditingController dniController = TextEditingController();
+
+    Future<void> buscarPorDNI() async {
+    final dni = dniController.text;
+
+    if (dni.isNotEmpty) {
+      try {
+        final response = await http.get(
+          Uri.parse('http://localhost:8080/api/clientes/buscarPorDNI/$dni'),
+        );
+
+        if (response.statusCode == 200) {
+          setState(() {
+            _clientes = clienteModeloFromJson(response.body);
+          });
+        } else {
+          throw Exception('Failed to load clientes');
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,46 +88,6 @@ class VentaPrin extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.refresh),
-                        onPressed: () {
-                          // Agrega la lógica de refresco aquí
-                        },
-                      ),
-                      SizedBox(
-                        width: 11, // Espacio entre los botones
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => Clientes(), 
-                          ));
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(
-                              7), // Ajusta el relleno según tus necesidades
-                          decoration: BoxDecoration(
-                            color: Colors.grey, // Color del botón
-                            borderRadius: BorderRadius.circular(
-                                8), // Ajusta según tu preferencia
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.add,
-                                  color: Colors.white), // Icono "más"
-                              Text(
-                                'Cliente',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
               SizedBox(height: 16),
@@ -110,6 +95,8 @@ class VentaPrin extends StatelessWidget {
                 children: [
                   Expanded(
                     child: TextFormField(
+                      controller: dniController,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(16.0),
                         border: OutlineInputBorder(
@@ -124,34 +111,58 @@ class VentaPrin extends StatelessWidget {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'Nombre del Cliente',
-                        hintText: 'Ingrese el nombre del Cliente',
+                        labelText: 'DNI',
+                        hintText: 'Ingrese N° DNI del Cliente',
                       ),
                     ),
                   ),
-                  SizedBox(
-                      width: 8), // Espacio entre el TextFormField y los iconos
+                  SizedBox(width: 8), // Espacio entre el TextFormField y los iconos
                   IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () {
-                      // Agrega la lógica de refresco aquí
+                      buscarPorDNI();
                     },
                   ),
-                  SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      dniController.clear();
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle, // Forma de círculo
+                        color: Colors
+                            .transparent, // Fondo transparente por defecto
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.cleaning_services,
+                          color: Colors.black, // Color gris por defecto
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.refresh),
+                    onPressed: () {
+                    },
+                  ),
+                  /*SizedBox(width: 8),
                   IconButton(
                     icon: Icon(Icons.calendar_today),
                     onPressed: () {
-                      // Agrega la lógica de refresco aquífolutter
+                      // Agrega la lógica del calendario aquí
                     },
-                  ),
+                  ),*/
                 ],
               ),
               SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => Venta2(),
-                ));
+                    builder: (context) => Venta2(),
+                  ));
                 },
                 style: ElevatedButton.styleFrom(
                   primary:
@@ -191,8 +202,7 @@ class VentaPrin extends StatelessWidget {
                       title: Text(
                         libro.title,
                         style: TextStyle(
-                          color: Colors
-                              .black, // Cambiamos el color del título a negro
+                          color: Colors.black, // Cambiamos el color del título a negro
                           fontWeight:
                               FontWeight.bold, // Hacemos el título en negrita
                         ),
@@ -200,8 +210,7 @@ class VentaPrin extends StatelessWidget {
                       subtitle: Text(
                         libro.subtitle,
                         style: TextStyle(
-                          color: Colors
-                              .black, // Cambiamos el color del subtítulo a negro
+                          color: Colors.black, // Cambiamos el color del subtítulo a negro
                         ),
                       ),
                       trailing: Row(
@@ -209,169 +218,16 @@ class VentaPrin extends StatelessWidget {
                         children: [
                           IconButton(
                             icon: Icon(Icons.edit,
-                                color: Colors.blue), // Icono de editar azul
+                                color: Colors.blue), 
                             onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return SingleChildScrollView(
-                                    child: Container(
-                                      padding: EdgeInsets.all(16.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          SizedBox(height: 10),
-                                          Text(
-                                            "Editar Cliente",
-                                            style: TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromARGB(
-                                                  255, 31, 30, 30),
-                                            ),
-                                          ),
-                                          SizedBox(height: 20),
-                                          TextFormField(
-                                            decoration: InputDecoration(
-                                              contentPadding:
-                                                  EdgeInsets.all(16.0),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              labelText: 'Nombre Completo',
-                                              hintText: 'Ingrese los nombres',
-                                            ),
-                                          ),
-                                          SizedBox(height: 10),
-                                          TextFormField(
-                                            decoration: InputDecoration(
-                                              contentPadding:
-                                                  EdgeInsets.all(16.0),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              labelText: 'Apellido Completo',
-                                              hintText: 'Ingrese los apellidos',
-                                            ),
-                                          ),
-                                          SizedBox(height: 10),
-                                          TextFormField(
-                                            decoration: InputDecoration(
-                                              contentPadding:
-                                                  EdgeInsets.all(16.0),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              labelText: 'DNI',
-                                              hintText: 'Ingrese el N° DNI',
-                                            ),
-                                          ),
-                                          SizedBox(height: 10),
-                                          TextFormField(
-                                            decoration: InputDecoration(
-                                              contentPadding:
-                                                  EdgeInsets.all(16.0),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                                borderSide: BorderSide(
-                                                  color: const Color.fromARGB(
-                                                      255, 50, 53, 56),
-                                                ),
-                                              ),
-                                              labelText: 'Telefono',
-                                              hintText:
-                                                  'Ingrese el n° telefonico',
-                                            ),
-                                          ),
-                                          SizedBox(height: 16),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Agrega la lógica para el botón aquí
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              primary: Color.fromARGB(
-                                                  255, 18, 94, 25),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                            child: Container(
-                                              width: double.infinity,
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 8.0),
-                                              child: Center(
-                                                child: Text(
-                                                  "Guardar",
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
+                              
                             },
                           ),
                           IconButton(
                             icon: Icon(Icons.delete,
-                                color: Colors.red), // Icono de eliminar rojo
+                                color: Colors.red), 
                             onPressed: () {
-                              // Lógica para borrar aquí
+                              
                             },
                           ),
                         ],

@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import '../modelos/libros_modelo.dart';
 
+class DetalleLibro extends StatelessWidget {
+  final LibroModelo libro;
 
-class DetalleLibros extends StatefulWidget {
-  @override
-  _DetalleLibrosState createState() => _DetalleLibrosState();
-}
-
-class _DetalleLibrosState extends State<DetalleLibros> {
-
-
+  DetalleLibro({required this.libro});
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +14,9 @@ class _DetalleLibrosState extends State<DetalleLibros> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-
             SizedBox(height: 10),
             Text(
-              "Detalle Cliente",
+              "Detalle Libro",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -31,99 +24,55 @@ class _DetalleLibrosState extends State<DetalleLibros> {
               ),
             ),
             SizedBox(height: 25),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  "Nombre:",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 31, 30, 30),
+            Card(
+              elevation: 4,
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: Text(
+                      'Titulo: ${libro.titulo}',
+                      /*style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),*/
+                    ),
+                    subtitle: Text(
+                      'Codigo: ${libro.codigo}',
+                    ),
                   ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'DNI:',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: Color.fromARGB(255, 31, 30, 30),
+                  ListTile(
+                    title: Text(
+                      'N° Paginas: ${libro.nPaginas}',
+                    ),
+                    subtitle: Text(
+                      'Precio: ${libro.precio}',
+                    ),
                   ),
-                ),
-              ],
+                  ListTile(
+                    title: Text(
+                      'Stock: ${libro.stock}',
+                    ),
+                    subtitle: Text(
+                      'Autor: ${libro.autor.nombre}',
+                    ),
+                  ),
+                  ListTile(
+                    title: Text(
+                      'Categoria: ${libro.categoria.nombre}',
+                    ),
+                    subtitle: Text(
+                      'Editorial: ${libro.editorial.nombre}',
+                    ),
+                  ),
+                  ListTile(
+                    title: Text(
+                      'Estado: ${libro.estado ? "Disponible" : "No disponible"}',
+                    ),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  "Apellido:",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 31, 30, 30),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Estado:",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: Color.fromARGB(255, 31, 30, 30),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  "DNI:",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 31, 30, 30),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Estado:",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: Color.fromARGB(255, 31, 30, 30),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  "Telefono:",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 31, 30, 30),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  "Estado:",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: Color.fromARGB(255, 31, 30, 30),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            
           ],
         ),
       ),

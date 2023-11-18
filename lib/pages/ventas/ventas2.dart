@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
+import '../modelos/ventas_modelo.dart';
 
 class LibroData {
   final String title;
@@ -9,21 +10,25 @@ class LibroData {
   LibroData({required this.title, required this.subtitle});
 }
 
-List<LibroData> libros = [
-  LibroData(title: '72227724', subtitle: 'Jorge Luis Mendez'),
-  LibroData(title: '72227710', subtitle: 'Jhon Sthev Gallardo'),
-  LibroData(title: '72227723', subtitle: 'Miguel Zarate Perez'),
-  LibroData(title: '72227723', subtitle: 'Miguel Zarate Perez'),
-  LibroData(title: '72227723', subtitle: 'Miguel Zarate Perez'),
-];
+class Venta2 extends StatefulWidget {
+  @override
+  _Venta2State createState() => _Venta2State();
+}
 
-class Venta2 extends StatelessWidget {
+class _Venta2State extends State<Venta2> {
   final TextEditingController codigoController = TextEditingController();
   final TextEditingController libroController = TextEditingController();
   final TextEditingController stockController = TextEditingController();
   final TextEditingController cantidadController = TextEditingController();
   final TextEditingController precioventaController = TextEditingController();
   final TextEditingController subtotalController = TextEditingController();
+  final TextEditingController dniController = TextEditingController();
+
+  bool mostrarTarjetaBusqueda = false;
+
+  List<LibroData> libros = [
+    LibroData(title: 'XXX', subtitle: 'Xxxx'),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -72,11 +77,25 @@ class Venta2 extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Clientes',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
+                      controller: dniController,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.all(16.0),
                         border: OutlineInputBorder(
@@ -91,30 +110,85 @@ class Venta2 extends StatelessWidget {
                             color: const Color.fromARGB(255, 40, 42, 43),
                           ),
                         ),
-                        labelText: 'DNI del Cliente',
-                        hintText: 'Ingrese el N° DNI del Cliente',
+                        labelText: 'DNI',
+                        hintText: 'Ingrese N° DNI del Cliente',
                       ),
                     ),
                   ),
-                  SizedBox(
-                      width: 8), // Espacio entre el TextFormField y los iconos
-                  IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      // Agrega la lógica de búsqueda aquí
+                  InkWell(
+                    onTap: () {
+                      dniController.clear();
                     },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.cleaning_services,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 8),
                   IconButton(
-                    icon: Icon(Icons.calendar_today),
+                    icon: Icon(Icons.search),
                     onPressed: () {
-                      // Agrega la lógica para mostrar un calendario aquí
+                      setState(() {
+                        mostrarTarjetaBusqueda = true;
+                      });
                     },
                   ),
                 ],
               ),
+              if (mostrarTarjetaBusqueda)
+                Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.only(
+                      top:
+                          8), // Añadido para dar espacio entre el campo de búsqueda y la tarjeta
+                  child: Card(
+                    elevation: 4,
+                    margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    color: Colors.white,
+                    child: ListTile(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      title: Text(
+                        'Cliente de Ejemplo',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Detalles del cliente de ejemplo',
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               SizedBox(height: 8),
               Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Libros',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
               SizedBox(height: 10),
               Row(
                 children: [
@@ -315,12 +389,13 @@ class Venta2 extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(20),
+                        shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.clear,
-                        color: Colors.white,
+                      child: Center(
+                        child: Icon(
+                          Icons.cleaning_services,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),

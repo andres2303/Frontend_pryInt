@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../modelos/cliente_modelo.dart';
 
-class DetalleCliente extends StatefulWidget {
+class DetalleCliente extends StatelessWidget {
   final ClienteModelo cliente;
 
   DetalleCliente({required this.cliente});
 
-  @override
-  _DetalleClienteState createState() => _DetalleClienteState();
-}
-
-class _DetalleClienteState extends State<DetalleCliente> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -31,44 +25,37 @@ class _DetalleClienteState extends State<DetalleCliente> {
               ),
             ),
             SizedBox(height: 25),
-            _buildDetalleRow("Nombre", widget.cliente.persona.nombre),
-            _buildDetalleRow("Apellido", widget.cliente.persona.apellidos),
-            _buildDetalleRow("DNI", widget.cliente.persona.dni),
-            _buildDetalleRow("Telefono", widget.cliente.persona.telefono),
+            Card(
+              elevation: 4,
+              margin: EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: Text(
+                      'Nombre: ${cliente.persona.nombre}',
+                      /*style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),*/
+                    ),
+                    subtitle: Text(
+                      'Apellido: ${cliente.persona.apellidos}',
+                    ),
+                  ),
+                  ListTile(
+                    title: Text(
+                      'DNI: ${cliente.persona.dni}',
+                    ),
+                    subtitle: Text(
+                      'Teléfono: ${cliente.persona.telefono}',
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildDetalleRow(String label, String value) {
-    return Column(
-      children: [
-        SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Text(
-              label + ":",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 31, 30, 30),
-              ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.normal,
-                color: Color.fromARGB(255, 31, 30, 30),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 }
-

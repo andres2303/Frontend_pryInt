@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../clientes/agregar_cliente.dart';
 import '../clientes/editar_cliente.dart';
 import '../clientes/detalle_cliente.dart';
@@ -68,6 +67,23 @@ class _ClientesState extends State<Clientes> {
     }
   }
 
+  Future<void> eliminarCliente(String idCliente) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://localhost:8080/api/clientes/eliminar/$idCliente'),
+      );
+
+      if (response.statusCode == 200) {
+        // Actualizar la lista de clientes después de la eliminación
+        actualizarClientes();
+      } else {
+        throw Exception('Failed to delete client');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +122,6 @@ class _ClientesState extends State<Clientes> {
           child: Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Clientes',
@@ -115,12 +130,33 @@ class _ClientesState extends State<Clientes> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  Spacer(), // Espaciado flexible para empujar los elementos a los extremos
+                  InkWell(
+                    onTap: () {
+                      dniController.clear();
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle, // Forma de círculo
+                        color: Colors
+                            .transparent, // Fondo transparente por defecto
+                      ),
+                      child: Center(
+                        child: Icon(
+                           Icons.cleaning_services,
+                          color: Colors.black, // Color gris por defecto
+                        ),
+                      ),
+                    ),
+                  ),
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
                       actualizarClientes();
                     },
-                  )
+                  ),
                 ],
               ),
               SizedBox(height: 16),
@@ -256,7 +292,32 @@ class _ClientesState extends State<Clientes> {
                           IconButton(
                             icon: Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
-                              // Lógica para borrar aquí
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("Confirmar Eliminación"),
+                                    content: Text(
+                                        "¿Estás seguro de que quieres eliminar este cliente?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("Cancelar"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Llamada a la función de eliminación
+                                          eliminarCliente(cliente.idCliente);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text("Eliminar"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                           ),
                         ],

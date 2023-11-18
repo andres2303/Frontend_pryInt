@@ -15,25 +15,6 @@ List<LibroModelo> libroModeloFromJson(String str) {
   return List<LibroModelo>.from(jsonData.map((x) => LibroModelo.fromJson(x)));
 }
 
-Future<List<LibroModelo>> fetchLibrosModelo() async {
-  try {
-    final response =
-        await http.get(Uri.parse('http://localhost:8080/api/libros/listar'));
-
-    if (response.statusCode == 200) {
-      // Parsear JSON
-      return libroModeloFromJson(response.body);
-    } else {
-      // Manejar error
-      throw Exception(
-          'Failed to load libros. Status code: ${response.statusCode}');
-    }
-  } catch (e) {
-    // Manejar errores de red u otros errores
-    throw Exception('Error en la solicitud HTTP: $e');
-  }
-}
-
 class LibroService {
   Future<void> deleteLibro(int id) async {
     final response = await http
@@ -66,32 +47,91 @@ class _LibroState extends State<Libro> {
   String? seleccionarEdito;
   String? selectedCategory;
   List<String> categoryList = [];
-  List<LibroData> libros = [];
-  final LibroService libroService = LibroService();
+  List<LibroModelo> libros = [];
+  TextEditingController codigoController = TextEditingController();
+  final LibroService libroService = LibroService();  
 
-  @override
+    @override
   void initState() {
     super.initState();
 
-    // Llamar a la función para obtener la lista de categorías
     fetchCategories().then((categories) {
       setState(() {
         categoryList = categories;
       });
     });
 
-    // Obtener la lista de libros
     actualizarLibros();
   }
 
-  Future<List<String>> fetchCategories() async {
+Future<List<LibroModelo>> fetchLibrosModelo() async {
+  try {
+    final response =
+        await http.get(Uri.parse('http://localhost:8080/api/libros/listar'));
+
+    if (response.statusCode == 200) {
+      // Parsear JSON
+      return libroModeloFromJson(response.body);
+    } else {
+      // Manejar error
+      throw Exception(
+          'Failed to load libros. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    // Manejar errores de red u otros errores
+    throw Exception('Error en la solicitud HTTP: $e');
+  }
+}
+
+    Future<void> buscarPorCodigo() async {
+    final codigo = codigoController.text;
+
+    if (codigo.isNotEmpty) {
+      try {
+        final response = await http.get(
+          Uri.parse(
+              'http://localhost:8080/api/libros/buscarPorCodigo?codigo=$codigo'),
+        );
+
+        if (response.statusCode == 200) {
+          List<LibroModelo> librosEncontrados =
+              libroModeloFromJson(response.body);
+          _filtrarLibros(librosEncontrados);
+        } else {
+          throw Exception('Failed to load libro');
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
+    }
+  }
+
+    Future<void> _filtrarLibros(List<LibroModelo> librosFiltrados) {
+    setState(() {
+      libros = librosFiltrados;
+    });
+    return Future.value();
+  }
+
+    Future<void> actualizarLibros() async {
+    try {
+      final fetchedLibros = await fetchLibrosModelo();
+      setState(() {
+        libros = fetchedLibros;
+      });
+    } catch (e) {
+      print('Error al actualizar libros: $e');
+    }
+  }
+
+    Future<List<String>> fetchCategories() async {
     try {
       final response = await http
           .get(Uri.parse('http://localhost:8080/api/categorias/listar'));
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-        // Mapear la lista de categorías desde el JSON
+
         List<String> categories = jsonData.map((category) {
           return category['nombre'].toString();
         }).toList();
@@ -104,26 +144,20 @@ class _LibroState extends State<Libro> {
     }
   }
 
-  Future<void> actualizarLibros() async {
+  Future<void> eliminarLibro(int id) async {
     try {
-      final fetchedLibros = await fetchLibrosModelo();
-      setState(() {
-        libros = fetchedLibros.map((libroModelo) {
-          return LibroData(
-            id: libroModelo.idLibro,
-            title: 'Codigo: ${libroModelo.codigo}',
-            subtitle: libroModelo.titulo,
-          );
-        }).toList();
-      });
+      await libroService.deleteLibro(id);
+      // Actualizar la lista de libros después de eliminar
+      actualizarLibros();
+      print('Libro eliminado correctamente');
     } catch (e) {
-      print('Error al actualizar libros: $e');
+      print('Error al eliminar el libro: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+     return Scaffold(
       appBar: AppBar(
         title: Center(
           child: Image.asset(
@@ -168,6 +202,27 @@ class _LibroState extends State<Libro> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  Spacer(),
+                  InkWell(
+                    onTap: () {
+                      codigoController.clear();
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle, // Forma de círculo
+                        color: Colors
+                            .transparent, // Fondo transparente por defecto
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.cleaning_services,
+                          color: Colors.black, // Color gris por defecto
+                        ),
+                      ),
+                    ),
+                  ),
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
@@ -178,6 +233,9 @@ class _LibroState extends State<Libro> {
               ),
               SizedBox(height: 16),
               TextFormField(
+                controller: codigoController,
+                keyboardType:
+                    TextInputType.number, // Configurar el tipo de teclado
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.all(16.0),
                   border: OutlineInputBorder(
@@ -192,8 +250,8 @@ class _LibroState extends State<Libro> {
                       color: const Color.fromARGB(255, 40, 42, 43),
                     ),
                   ),
-                  labelText: 'Nombre de Libro',
-                  hintText: 'Ingrese el nombre del Libro',
+                  labelText: 'Codigo',
+                  hintText: 'Ingrese el codigo del Libro',
                 ),
               ),
               SizedBox(height: 16),
@@ -223,20 +281,17 @@ class _LibroState extends State<Libro> {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  // Agrega la lógica para el botón aquí
+                  buscarPorCodigo();
                 },
                 style: ElevatedButton.styleFrom(
-                  primary:
-                      Color.fromARGB(255, 250, 205, 5), // Color de fondo negro
+                  primary: Color.fromARGB(255, 250, 205, 5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: Container(
-                  width: double.infinity, // Ancho máximo
-                  padding: EdgeInsets.symmetric(
-                      vertical:
-                          8.0), // Ajusta el valor vertical para cambiar la altura del botón
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
                   child: Center(
                     child: Text(
                       "Buscar",
@@ -293,16 +348,14 @@ class _LibroState extends State<Libro> {
                     child: ListTile(
                       contentPadding: EdgeInsets.symmetric(horizontal: 16),
                       title: Text(
-                        libro.title,
+                        'Código: ${libro.codigo}',
                         style: TextStyle(
-                          color: Colors
-                              .black, // Cambiamos el color del título a negro
-                          fontWeight:
-                              FontWeight.bold, // Hacemos el título en negrita
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       subtitle: Text(
-                        libro.subtitle,
+                        libro.titulo,
                         style: TextStyle(
                           color: Colors.black,
                         ),
@@ -317,7 +370,7 @@ class _LibroState extends State<Libro> {
                               showModalBottomSheet(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return DetalleLibros();
+                                  return DetalleLibro(libro: libro);
                                 },
                               );
                             },
@@ -334,11 +387,36 @@ class _LibroState extends State<Libro> {
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete,
-                                color: Colors.red), // Icono de eliminar rojo
+                            icon: Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
-                              // Lógica para borrar aquí
-                              LibroService().deleteLibro(libro.id);
+                              // Mostrar un diálogo de confirmación antes de eliminar
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Eliminar Libro'),
+                                    content: Text(
+                                        '¿Está seguro de que desea eliminar este libro?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(
+                                              context); // Cerrar el diálogo de confirmación
+                                        },
+                                        child: Text('Cancelar'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          eliminarLibro(libro.idLibro);
+                                          Navigator.pop(
+                                              context); // Cerrar el diálogo de confirmación
+                                        },
+                                        child: Text('Eliminar'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                           ),
                         ],
