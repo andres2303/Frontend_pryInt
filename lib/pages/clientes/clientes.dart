@@ -154,6 +154,7 @@ class _ClientesState extends State<Clientes> {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
+                      dniController.clear(); 
                       actualizarClientes();
                     },
                   ),

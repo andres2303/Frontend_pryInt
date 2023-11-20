@@ -226,6 +226,7 @@ Future<List<LibroModelo>> fetchLibrosModelo() async {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
+                      codigoController.clear(); 
                       actualizarLibros();
                     },
                   ),

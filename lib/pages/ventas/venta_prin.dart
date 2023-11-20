@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../components/drawer.dart';
 import '../components/botones_navegacion.dart';
-import '../clientes/clientes.dart';
 import 'dart:convert';
 import '../ventas/ventas2.dart';
 import 'package:http/http.dart' as http;
 import '../modelos/ventas_modelo.dart';
+import '../ventas/detalle_venta.dart';
 
 class VentaPrin extends StatefulWidget {
   @override
@@ -42,6 +42,27 @@ class _VentaPrinState extends State<VentaPrin> {
       // Si la solicitud no fue exitosa, muestra un mensaje de error
       print(
           'Error al cargar las ventas. Código de estado: ${response.statusCode}');
+    }
+  }
+
+  void actualizarVentas() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:8080/api/ventas/listar'),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _clientes.clear(); // Limpiar la lista de clientes
+          ventas = (json.decode(response.body) as List)
+              .map((json) => VentaModel.fromJson(json))
+              .toList();
+        });
+      } else {
+        throw Exception('Failed to load ventas');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
@@ -172,7 +193,10 @@ class _VentaPrinState extends State<VentaPrin> {
                   ),
                   IconButton(
                     icon: Icon(Icons.refresh),
-                    onPressed: () {},
+                    onPressed: () {
+                      dniController.clear();
+                      actualizarVentas();
+                    },
                   ),
                   /*SizedBox(width: 8),
                   IconButton(
@@ -216,58 +240,115 @@ class _VentaPrinState extends State<VentaPrin> {
               ),
               SizedBox(height: 16),
               Column(
-                children: ventas.map((venta) {
-                  return Card(
-                    elevation: 4,
-                    margin: EdgeInsets.symmetric(vertical: 4, horizontal: 0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    color: Colors.white, // Cambiamos el color de fondo a blanco
-                    child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                      title: Text(
-                         '${venta.cliente.persona.apellidos}, ${venta.cliente.persona.nombre}',
-                        style: TextStyle(
-                          color: Colors
-                              .black, // Cambiamos el color del título a negro
-                          fontWeight:
-                              FontWeight.bold, // Hacemos el título en negrita
-                        ),
-                      ),
-                      subtitle: Text(
-                        'DNI: ${venta.cliente.persona.dni}',
-                        style: TextStyle(
-                          color: Colors
-                              .black, // Cambiamos el color del subtítulo a negro
-                        ),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.visibility,
-                                color: Colors.black), // Icono de editar negro
-                            onPressed: () {
-                            },
+                children: (_clientes.isNotEmpty
+                    ? _clientes.map((cliente) {
+                        return Card(
+                          elevation: 4,
+                          margin:
+                              EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () {
-                              // Agrega la lógica para editar la venta
-                            },
+                          color: Colors.white,
+                          child: ListTile(
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 16),
+                            title: Text(
+                              '${cliente.persona.apellidos}, ${cliente.persona.nombre}',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'DNI: ${cliente.persona.dni}',
+                              style: TextStyle(
+                                color: Colors.black,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.visibility,
+                                      color: Colors.black),
+                                  onPressed: () {
+                                    // Agrega la lógica para visualizar la venta
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () {
+                                    // Agrega la lógica para editar la venta
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    // Agrega la lógica para eliminar la venta
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              // Agrega la lógica para eliminar la venta
-                            },
+                        );
+                      }).toList()
+                    : ventas.map((venta) {
+                        return Card(
+                          elevation: 4,
+                          margin:
+                              EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
+                          color: Colors.white,
+                          child: ListTile(
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 16),
+                            title: Text(
+                              '${venta.cliente.persona.apellidos}, ${venta.cliente.persona.nombre}',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'DNI: ${venta.cliente.persona.dni}',
+                              style: TextStyle(
+                                color: Colors.black,
+                              ),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.visibility,
+                                      color: Colors.black),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => DetalleVenta()),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.blue),
+                                  onPressed: () {
+                                    // Agrega la lógica para editar la venta
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    // Agrega la lógica para eliminar la venta
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList()),
               ),
             ],
           ),
