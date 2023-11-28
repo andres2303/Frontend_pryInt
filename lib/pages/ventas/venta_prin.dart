@@ -6,6 +6,7 @@ import '../ventas/ventas2.dart';
 import 'package:http/http.dart' as http;
 import '../modelos/ventas_modelo.dart';
 import '../ventas/detalle_venta.dart';
+import 'package:flutter/services.dart';
 
 class VentaPrin extends StatefulWidget {
   @override
@@ -20,11 +21,25 @@ class _VentaPrinState extends State<VentaPrin> {
   List<ClienteModel> _clientes = [];
   List<VentaModel> ventas = [];
   TextEditingController dniController = TextEditingController();
+  final countController = TextEditingController(text: '0/8');
 
   @override
   void initState() {
     super.initState();
     _fetchVentas();
+    dniController.addListener(updateCount);
+  }
+
+  void updateCount() {
+    setState(() {
+      countController.text = '${dniController.text.length}/8';
+    });
+  }
+
+  @override
+  void dispose() {
+    dniController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchVentas() async {
@@ -140,71 +155,100 @@ class _VentaPrinState extends State<VentaPrin> {
               SizedBox(height: 16),
               Row(
                 children: [
+                  // Primera columna para TextFormField y su contador
                   Expanded(
-                    child: TextFormField(
-                      controller: dniController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        contentPadding: EdgeInsets.all(16.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: const Color.fromARGB(255, 40, 42, 43),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment
+                          .center, // Centra los elementos verticalmente
+                      children: [
+                        TextFormField(
+                          controller: dniController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(8),
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(16.0),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide(
+                                color: const Color.fromARGB(255, 40, 42, 43),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide(
+                                color: const Color.fromARGB(255, 40, 42, 43),
+                              ),
+                            ),
+                            labelText: 'DNI',
+                            hintText: 'Ingrese N° DNI del Cliente',
                           ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                          borderSide: BorderSide(
-                            color: const Color.fromARGB(255, 40, 42, 43),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                countController.text,
+                                style: TextStyle(
+                                  color: const Color.fromARGB(255, 0, 0, 0),
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        labelText: 'DNI',
-                        hintText: 'Ingrese N° DNI del Cliente',
-                      ),
+                      ],
                     ),
                   ),
-                  SizedBox(
-                      width: 8), // Espacio entre el TextFormField y los iconos
-                  IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      buscarPorDNI();
-                    },
-                  ),
-                  InkWell(
-                    onTap: () {
-                      dniController.clear();
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle, // Forma de círculo
-                        color: Colors
-                            .transparent, // Fondo transparente por defecto
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.cleaning_services,
-                          color: Colors.black, // Color gris por defecto
+                  SizedBox(width: 8),
+                  Align(
+                    alignment:
+                        Alignment.topCenter, // Alineación en la parte superior
+                    child: Row(
+                      mainAxisSize: MainAxisSize
+                          .min, // Importante para mantener el tamaño adecuado de la fila
+                      mainAxisAlignment: MainAxisAlignment
+                          .center, // Alinea los íconos horizontalmente
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.search),
+                          onPressed: () {
+                            buscarPorDNI();
+                          },
                         ),
-                      ),
+                        InkWell(
+                          onTap: () {
+                            dniController.clear();
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.transparent,
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.cleaning_services,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.refresh),
+                          onPressed: () {
+                            dniController.clear();
+                            actualizarVentas();
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.refresh),
-                    onPressed: () {
-                      dniController.clear();
-                      actualizarVentas();
-                    },
-                  ),
-                  /*SizedBox(width: 8),
-                  IconButton(
-                    icon: Icon(Icons.calendar_today),
-                    onPressed: () {
-                      // Agrega la lógica del calendario aquí
-                    },
-                  ),*/
                 ],
               ),
               SizedBox(height: 12),
@@ -325,11 +369,7 @@ class _VentaPrinState extends State<VentaPrin> {
                                   icon: Icon(Icons.visibility,
                                       color: Colors.black),
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => DetalleVenta()),
-                                    );
+                                    DetalleVenta();
                                   },
                                 ),
                                 IconButton(

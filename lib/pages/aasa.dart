@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../modelos/libros_modelo.dart';
+import '../pages/modelos/libros_modelo.dart';
 import 'dart:convert';
 
 class AgregarLibros extends StatefulWidget {
@@ -15,20 +15,34 @@ class _AgregarLibrosState extends State<AgregarLibros> {
   final TextEditingController stockController = TextEditingController();
   final TextEditingController precioController = TextEditingController();
 
-  String? selectedCategoriaId;
-  String? selectedEditorialId;
-  String? selectedAutorId;
-
-  List<CategoriaModelo> categorias = [];
-  List<EditorialModelo> editoriales = [];
-  List<AutorModelo> autores = [];
+  String? selectedCategory;
+  String? selectedEditorial;
+  String? selectedAuthor;
+  List<String> categoryList = [];
+  List<String> editorialList = [];
+  List<String> authorList = [];
 
   @override
   void initState() {
     super.initState();
-    obtenerCategorias();
-    obtenerEditoriales();
-    obtenerAutores();
+    // Llamar a la función para obtener la lista de categorías, editoriales y autores
+    fetchCategories().then((categories) {
+      setState(() {
+        categoryList = categories;
+      });
+    });
+
+    fetchEditorials().then((editorials) {
+      setState(() {
+        editorialList = editorials;
+      });
+    });
+
+    fetchAuthors().then((authors) {
+      setState(() {
+        authorList = authors;
+      });
+    });
   }
 
   Future<List<String>> fetchCategories() async {
@@ -46,118 +60,61 @@ class _AgregarLibrosState extends State<AgregarLibros> {
     }
   }
 
-  Future<void> obtenerCategorias() async {
-    try {
-      // Realiza la solicitud a tu API de categorías
-      var response = await http
-          .get(Uri.parse('http://localhost:8080/api/categorias/listar'));
+  Future<List<String>> fetchEditorials() async {
+    final response = await http
+        .get(Uri.parse('http://localhost:8080/api/editoriales/listar'));
 
-      if (response.statusCode == 200) {
-        setState(() {
-          categorias = (json.decode(response.body) as List)
-              .map((data) => CategoriaModelo.fromJson(data))
-              .toList();
-        });
-      } else {
-        print('Error del servidor: ${response.statusCode}');
-      }
-    } on FormatException {
-      print('Formato de respuesta no válido');
-    } catch (e) {
-      print('Ocurrió un error inesperado: $e');
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body);
+      List<String> editorials = jsonData.map((editorial) {
+        return editorial['nombre'].toString();
+      }).toList();
+      return editorials;
+    } else {
+      throw Exception('Failed to load editorials');
     }
   }
 
-  Future<void> obtenerEditoriales() async {
-    try {
-      // Realiza la solicitud a tu API de categorías
-      var response = await http
-          .get(Uri.parse('http://localhost:8080/api/editoriales/listar'));
+    Future<List<String>> fetchAuthors() async {
+    final response = await http.get(Uri.parse('http://localhost:8080/api/autores/listar'));
 
-      if (response.statusCode == 200) {
-        setState(() {
-          categorias = (json.decode(response.body) as List)
-              .map((data) => CategoriaModelo.fromJson(data))
-              .toList();
-        });
-      } else {
-        print('Error del servidor: ${response.statusCode}');
-      }
-    } on FormatException {
-      print('Formato de respuesta no válido');
-    } catch (e) {
-      print('Ocurrió un error inesperado: $e');
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = json.decode(response.body);
+      List<String> authors = jsonData.map((author) {
+        return author['nombre'].toString();
+      }).toList();
+      return authors;
+    } else {
+      throw Exception('Failed to load authors');
     }
   }
 
-  Future<void> obtenerAutores() async {
-    try {
-      // Realiza la solicitud a tu API de categorías
-      var response =
-          await http.get(Uri.parse('http://localhost:8080/api/autores/listar'));
-
-      if (response.statusCode == 200) {
-        setState(() {
-          categorias = (json.decode(response.body) as List)
-              .map((data) => CategoriaModelo.fromJson(data))
-              .toList();
-        });
-      } else {
-        print('Error del servidor: ${response.statusCode}');
-      }
-    } on FormatException {
-      print('Formato de respuesta no válido');
-    } catch (e) {
-      print('Ocurrió un error inesperado: $e');
-    }
-  }
-
-  LibroModelo crearLibroModelo() {
-    CategoriaModelo categoriaSeleccionada = categorias.firstWhere(
-      (categoria) => categoria.idCategoria.toString() == selectedCategoriaId,
-    );
-
-    EditorialModelo editorialSeleccionada = editoriales.firstWhere(
-      (editorial) => editorial.idEditorial.toString() == selectedEditorialId,
-    );
-
-    // Encuentra el autor seleccionado basado en el ID
-    AutorModelo autorSeleccionado = autores.firstWhere(
-      (autor) => autor.idAutor.toString() == selectedAutorId,
-    );
-
-    return LibroModelo(
-      idLibro: 0, // Si el ID se genera automáticamente en el backend
-      titulo: tituloController.text,
-      codigo: codigoController.text,
-      nPaginas: int.tryParse(paginasController.text) ?? 0,
-      precio: double.tryParse(precioController.text) ?? 0.0,
-      stock: int.tryParse(stockController.text) ?? 0,
-      estado: true,
-      categoria: categoriaSeleccionada,
-      editorial: editorialSeleccionada,
-      autor: autorSeleccionado,
-    );
-  }
-
-  Future<void> enviarLibro(LibroModelo libro) async {
-    var url = Uri.parse('http://localhost:8080/api/libros/crear');
-    var response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(libro.toJson()),
+  Future<void> createLibro() async {
+    final response = await http.post(
+      Uri.parse('http://localhost:8080/api/libros/crear'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'codigo': codigoController.text,
+        'titulo': tituloController.text,
+        'categoria': selectedCategory,
+        'editorial': selectedEditorial,
+        'autor': selectedAuthor,
+        'numPaginas': paginasController.text,
+        'stock': stockController.text,
+        'precioVenta': precioController.text,
+      }),
     );
 
     if (response.statusCode == 200) {
-      // El libro se agregó correctamente
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Libro agregado con éxito')),
-      );
+      // Libro creado exitosamente
+      print('Libro creado exitosamente');
+      // Puedes agregar lógica adicional aquí si lo necesitas
     } else {
-      // Hubo un problema al agregar el libro
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al agregar el libro')),
-      );
+      // Error al crear el libro
+      print('Error al crear el libro: ${response.statusCode}');
+      // Puedes manejar el error de acuerdo a tus necesidades
     }
   }
 
@@ -221,56 +178,69 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             ),
             SizedBox(height: 10),
             DropdownButton<String>(
-              value: selectedCategoriaId,
-              hint: Text(
-                  "Seleccionar Categoría"), // Mostrar esto cuando el valor sea null
+              isExpanded: true,
+              value: selectedCategory,
               onChanged: (String? newValue) {
                 setState(() {
-                  selectedCategoriaId = newValue;
+                  selectedCategory = newValue;
                 });
               },
-              items: categorias
-                  .map<DropdownMenuItem<String>>((CategoriaModelo categoria) {
-                return DropdownMenuItem<String>(
-                  value: categoria.idCategoria.toString(),
-                  child: Text(categoria.nombre),
-                );
-              }).toList(),
+              items: [
+                DropdownMenuItem<String>(
+                  value: null,
+                  child: Text('Seleccionar Categoría'),
+                ),
+                ...categoryList.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ],
             ),
             SizedBox(height: 10),
             DropdownButton<String>(
-              value: selectedEditorialId,
-              hint: Text(
-                  "Seleccionar Editorial"), // Mostrar esto cuando el valor sea null
+              isExpanded: true,
+              value: selectedEditorial,
               onChanged: (String? newValue) {
                 setState(() {
-                  selectedEditorialId = newValue;
+                  selectedEditorial = newValue;
                 });
               },
-              items: editoriales
-                  .map<DropdownMenuItem<String>>((EditorialModelo editorial) {
-                return DropdownMenuItem<String>(
-                  value: editorial.idEditorial.toString(),
-                  child: Text(editorial.nombre),
-                );
-              }).toList(),
+              items: [
+                DropdownMenuItem<String>(
+                  value: null,
+                  child: Text('Seleccionar Editorial'),
+                ),
+                ...editorialList.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ],
             ),
             SizedBox(height: 10),
             DropdownButton<String>(
-              value: selectedAutorId,
-              hint: Text(
-                  "Seleccionar Autor"), // Mostrar esto cuando el valor sea null
+              isExpanded: true,
+              value: selectedAuthor,
               onChanged: (String? newValue) {
                 setState(() {
-                  selectedAutorId = newValue;
+                  selectedAuthor = newValue;
                 });
               },
-              items: autores.map<DropdownMenuItem<String>>((AutorModelo autor) {
-                return DropdownMenuItem<String>(
-                  value: autor.idAutor.toString(),
-                  child: Text(autor.nombre),
-                );
-              }).toList(),
+              items: [
+                DropdownMenuItem<String>(
+                  value: null,
+                  child: Text('Seleccionar Autor'),
+                ),
+                ...authorList.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ],
             ),
             SizedBox(height: 10),
             TextFormField(
@@ -317,10 +287,10 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             SizedBox(height: 10),
             TextFormField(
               controller: precioController,
-              style: TextStyle(fontSize: 14),
+              style:TextStyle(fontSize: 14),
               decoration: InputDecoration(
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(
                       4.0), // Reducimos el radio de los bordes
@@ -343,7 +313,7 @@ class _AgregarLibrosState extends State<AgregarLibros> {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                LibroModelo nuevoLibro = crearLibroModelo();
+              createLibro();
               },
               style: ElevatedButton.styleFrom(
                 primary: Color.fromARGB(255, 53, 75, 245),

@@ -64,6 +64,33 @@ class _LibroState extends State<Libro> {
     actualizarLibros();
   }
 
+  Future<void> eliminarLibro(int idLibro) async {
+
+  try {
+
+    final response = await http.delete(
+      Uri.parse('http://localhost:8080/api/libros/eliminar/$idLibro'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',  
+      },
+    );
+
+    if(response.statusCode == 200){
+      // Libro eliminado correctamente
+      print("Libro eliminado");
+
+    } else {
+      // Hubo un error
+      throw Exception('Failed to delete libro.'); 
+    }
+
+  } catch(e) {
+    // Manejar error 
+    print('Error al eliminar libro: $e');
+  }
+
+}
+
 Future<List<LibroModelo>> fetchLibrosModelo() async {
   try {
     final response =
@@ -141,17 +168,6 @@ Future<List<LibroModelo>> fetchLibrosModelo() async {
       }
     } catch (e) {
       throw Exception('Error en la solicitud HTTP: $e');
-    }
-  }
-
-  Future<void> eliminarLibro(int id) async {
-    try {
-      await libroService.deleteLibro(id);
-      // Actualizar la lista de libros después de eliminar
-      actualizarLibros();
-      print('Libro eliminado correctamente');
-    } catch (e) {
-      print('Error al eliminar el libro: $e');
     }
   }
 

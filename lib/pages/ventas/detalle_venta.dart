@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../modelos/libros_modelo.dart';
 
 class DetalleVenta extends StatefulWidget {
   @override
@@ -7,104 +6,198 @@ class DetalleVenta extends StatefulWidget {
 }
 
 class _DetalleVentaState extends State<DetalleVenta> {
-  final TextEditingController codigoController = TextEditingController();
-  final TextEditingController tituloController = TextEditingController();
-  final TextEditingController nPaginasController = TextEditingController();
-  final TextEditingController stockController = TextEditingController();
-  final TextEditingController precioVentaController = TextEditingController();
-
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  void _guardarCambios() {
-    // Aquí puedes implementar la lógica para guardar los cambios
-    if (_formKey.currentState?.validate() ?? false) {
-      // Validación exitosa, guarda los cambios
-      // Accede a los valores de los controladores para obtener la información
-      String codigo = codigoController.text;
-      String titulo = tituloController.text;
-      // ... (agrega el resto de los campos)
-
-      // Implementa la lógica para guardar los cambios según tus necesidades
-      // Por ejemplo, puedes enviar los datos al servidor o actualizar tu modelo
-
-      // Una vez que hayas guardado los cambios, puedes realizar acciones adicionales
-      // como mostrar un mensaje de éxito, navegar a otra pantalla, etc.
-    }
-  }
+  String? seleccionarCate;
+  String? seleccionarEdito;
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Form(
-        key: _formKey,
-        child: Container(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              SizedBox(height: 10),
-              Text(
-                "Editar libro",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 31, 30, 30),
-                ),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            SizedBox(height: 10),
+            Text(
+              "Editar libro",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 31, 30, 30),
               ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: codigoController,
-                // ... (otras propiedades)
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: tituloController,
-                // ... (otras propiedades)
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: nPaginasController,
-                // ... (otras propiedades)
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: stockController,
-                // ... (otras propiedades)
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: precioVentaController,
-                style: TextStyle(fontSize: 14),
-                // ... (otras propiedades)
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _guardarCambios,
-                style: ElevatedButton.styleFrom(
-                  primary: Color.fromARGB(255, 18, 94, 25),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            ),
+            SizedBox(height: 20),
+            TextFormField(
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
                   ),
                 ),
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Center(
-                    child: Text(
-                      "Guardar",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                labelText: 'Codigo',
+                hintText: 'Ingrese el codigo',
+              ),
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                labelText: 'Titulo',
+                hintText: 'Ingrese el titulo',
+              ),
+            ),
+            SizedBox(height: 10),
+            DropdownButton<String>(
+              isExpanded: true,
+              value: seleccionarCate, // Valor inicial es null o vacío
+              onChanged: (String? newValue) {
+                setState(() {
+                  seleccionarCate = newValue;
+                });
+              },
+              items: <String>['Deporte', 'Manga', 'Cocina']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 10),
+            DropdownButton<String>(
+              isExpanded: true,
+              value: seleccionarEdito, // Valor inicial es null o vacío
+              onChanged: (String? newValue) {
+                setState(() {
+                  seleccionarEdito = newValue;
+                });
+              },
+              items: <String>['Chipre', 'Universal', 'Son']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                labelText: 'N° Paginas',
+                hintText: 'Ingrese el n° paginas',
+              ),
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.all(16.0),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                  ),
+                ),
+                labelText: 'Stock',
+                hintText: 'Ingrese el stock',
+              ),
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              style:
+                  TextStyle(fontSize: 14), // Reducimos el tamaño de la fuente
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8), // Reducimos el espacio interno
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(
+                      4.0), // Reducimos el radio de los bordes
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                    width: 1, // Reducimos el grosor del borde
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4.0),
+                  borderSide: BorderSide(
+                    color: const Color.fromARGB(255, 50, 53, 56),
+                    width: 1,
+                  ),
+                ),
+                labelText: 'Precio Venta',
+                hintText: 'Ingrese el precio de venta',
+              ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Agrega la lógica para el botón aquí
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Color.fromARGB(
+                    255, 18, 94, 25), // Cambiamos el color al valor hexadecimal
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Center(
+                  child: Text(
+                    "Guardar",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 16),
-            ],
-          ),
+            ),
+            SizedBox(height: 16),
+          ],
         ),
       ),
     );
   }
 }
+

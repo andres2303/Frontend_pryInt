@@ -74,8 +74,7 @@ class _ClientesState extends State<Clientes> {
       );
 
       if (response.statusCode == 200) {
-        // Actualizar la lista de clientes después de la eliminación
-        actualizarClientes();
+        // Mostrar snackbar de confirmación, etc
       } else {
         throw Exception('Failed to delete client');
       }
@@ -145,7 +144,7 @@ class _ClientesState extends State<Clientes> {
                       ),
                       child: Center(
                         child: Icon(
-                           Icons.cleaning_services,
+                          Icons.cleaning_services,
                           color: Colors.black, // Color gris por defecto
                         ),
                       ),
@@ -154,7 +153,7 @@ class _ClientesState extends State<Clientes> {
                   IconButton(
                     icon: Icon(Icons.refresh),
                     onPressed: () {
-                      dniController.clear(); 
+                      dniController.clear();
                       actualizarClientes();
                     },
                   ),
@@ -294,33 +293,31 @@ class _ClientesState extends State<Clientes> {
                             icon: Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
                               showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text("Confirmar Eliminación"),
-                                    content: Text(
-                                        "¿Estás seguro de que quieres eliminar este cliente?"),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text("Cancelar"),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          // Llamada a la función de eliminación
-                                          eliminarCliente(cliente.idCliente);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text("Eliminar"),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Confirmar Eliminación"),
+                                      content: Text(
+                                          "¿Seguro que desea eliminar el cliente?"),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
+                                            child: Text("Cancelar")),
+                                        TextButton(
+                                            onPressed: () {
+                                              // Llamar la función de eliminar con el id
+                                              eliminarCliente(
+                                                  cliente.idCliente);
+
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text("Eliminar"))
+                                      ],
+                                    );
+                                  });
                             },
-                          ),
+                          )
                         ],
                       ),
                     ),

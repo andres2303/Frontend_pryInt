@@ -39,6 +39,21 @@ class LibroModelo {
       autor: AutorModelo.fromJson(json['autor'] ?? {}),
     );
   }
+
+    Map<String, dynamic> toJson() {
+    return {
+      'idLibro': idLibro,
+      'titulo': titulo,
+      'codigo': codigo,
+      'nPaginas': nPaginas,
+      'precio': precio,
+      'stock': stock,
+      'estado': estado,
+      'categoria': categoria.toJson(),
+      'editorial': editorial.toJson(),
+      'autor': autor.toJson(),
+    };
+  }
 }
 
 class CategoriaModelo {
@@ -58,6 +73,14 @@ class CategoriaModelo {
       nombre: json['nombre'] ?? '',
       estado: json['estado'] ?? false,
     );
+  }
+
+    Map<String, dynamic> toJson() {
+    return {
+      'idCategoria': idCategoria,
+      'nombre': nombre,
+      'estado': estado,
+    };
   }
 }
 
@@ -79,6 +102,14 @@ class EditorialModelo {
       estado: json['estado'] ?? false,
     );
   }
+
+    Map<String, dynamic> toJson() {
+    return {
+      'idEditorial': idEditorial,
+      'nombre': nombre,
+      'estado': estado,
+    };
+  }
 }
 
 class AutorModelo {
@@ -98,5 +129,13 @@ class AutorModelo {
       nombre: json['nombre'] ?? '',
       estado: json['estado'] ?? false,
     );
+  }
+
+    Map<String, dynamic> toJson() {
+    return {
+      'idAutor': idAutor,
+      'nombre': nombre,
+      'estado': estado,
+    };
   }
 }
